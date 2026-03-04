@@ -1,10 +1,10 @@
 from flask import Flask
 
-app = Flask(name)
+app = Flask(__name__)
 
 @app.route('/')
 def home():
-** return '<h1>NS PureOil Production</h1><p>Sistema avviato!</p>'**
+    return '<h1>NS PureOil Production</h1><p>Sistema avviato!</p>'
 
-if name == 'main':
-** app.run(debug=True)**
+if __name__ == '__main__':
+    app.run(debug=True)
