@@ -16,6 +16,9 @@
 
 <p>Olive: <strong>{{ inventory.olives }}</strong> kg</p>
 <p>Olio: <strong>{{ inventory.oil }}</strong> litri</p>
+{% if inventory.last_production %}
+<p>Последнее производство: <strong>{{ inventory.last_production }}</strong></p>
+{% endif %}
 
 <hr>
 

@@ -1,8 +1,9 @@
-from flask import Flask, render_template, redirect, url_for     
+from flask import Flask, render_template, redirect, url_for
+from datetime import datetime
 
 app = Flask(__name__)
 
-olives_stock = {'olives': 500,'oil':0,'money':1000}  # Inventario del magazzino (materie prime, prodotti, denaro)
+olives_stock = {'olives': 500,'oil':0,'money':1000,'last_production':None}  # Inventario del magazzino (materie prime, prodotti, denaro)
 
 @app.route('/')
 def home():
@@ -22,12 +23,13 @@ def buy():
 
 @app.route('/produce')
 def produce():
- cost_molitura = 16.5
- if olives_stock['olives'] >= 100 and olives_stock['money'] >= cost_molitura:
-    olives_stock['olives'] -= 100
-    olives_stock['money'] -= cost_molitura
-    olives_stock['oil'] += 20
- return redirect(url_for('status'))
+    cost_molitura = 16.5
+    if olives_stock['olives'] >= 100 and olives_stock['money'] >= cost_molitura:
+        olives_stock['olives'] -= 100
+        olives_stock['money'] -= cost_molitura
+        olives_stock['oil'] += 20
+        olives_stock['last_production'] = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
+    return redirect(url_for('status'))
 
 @app.route('/sell')
 def sell():
