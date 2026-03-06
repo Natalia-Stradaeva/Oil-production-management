@@ -6,28 +6,40 @@
 <title>Stock Olive</title>
 </head>
 <body>
-<h1>Magazzino Materie Prime</h1>
+<h1>Magazzino e Produzione</h1>
 
-<a href="/buy" style="background: blue; color: white;"> Acquista 100kg (105€) </a>
+<div style="margin-bottom: 20px;">
+    <a href="/buy" style="background: blue; color: white; 
+    padding: 5px; text-decoration: none;"> Acquista 100kg (105€) </a>
+    <a href="/produce" style="background: green; color: white;
+     padding: 5px; text-decoration: none;"> Inizia produzione (16.5€) </a>
+    <a href="/sell" style="background: orange; color: black; 
+        padding: 5px; text-decoration: none;"> Vendi Olio (Prezzo mercato) </a>
+</div>
 
-<a href="/produce" style="background: green; color: white;"> Inizia la produzione (16.5€) </a>
+<hr>
 
-<a href="/sell" style="background: orange; color: black;"> Vendi l'olio (12€/l) </a>
+<p>Olive disponibili: <strong>{{ inventory.olives }}</strong> kg</p>
 
-<p>Olive: <strong>{{ inventory.olives }}</strong> kg</p>
-<p>Olio: <strong>{{ inventory.oil }}</strong> litri</p>
+<p>Olio Extra Vergine (EVO): <strong>{{ inventory.oil_extra }}</strong> L</p>
+<p>Olio Vergine: <strong>{{ inventory.oil_virgin }}</strong> L</p>
+<p>Sansa (scarti): <strong>{{ inventory.sansa }}</strong> kg</p>
+
+<p>Tempo totale di lavoro: <strong>{{ inventory.total_time }}</strong> min</p>
+
 {% if inventory.last_production %}
-<p>Последнее производство: <strong>{{ inventory.last_production }}</strong></p>
+    <p>Ultima operazione: <strong>{{ inventory.last_production }}</strong></p>
 {% endif %}
 
 <hr>
 
-
-
-<p>Portafoglio: <strong>{{ inventory.money }}</strong> €</p>
+<p>Portafoglio (Budget): <strong>{{ inventory.money }}</strong> €</p>
 
 <hr>
 
+<a href="/">Torna alla Home</a>
+</body>
+</html>
 
 
 
