@@ -1,49 +1,60 @@
 <!DOCTYPE html>
-
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<title>Stock Olive</title>
+    <meta charset="UTF-8">
+    <title>Oleificio Natasha - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-<h1>Magazzino e Produzione</h1>
+    <div class="container">
+        <h1>Gestione Oleificio - Eccellenza Campana</h1>
 
-<div style="margin-bottom: 20px;">
-    <a href="/buy" style="background: blue; color: white; 
-    padding: 5px; text-decoration: none;"> Acquista 100kg (105€) </a>
-    <a href="/produce" style="background: green; color: white;
-     padding: 5px; text-decoration: none;"> Inizia produzione (16.5€) </a>
-    <a href="/sell" style="background: orange; color: black; 
-        padding: 5px; text-decoration: none;"> Vendi Olio (Prezzo mercato) </a>
-</div>
+        <div class="actions" style="margin-bottom: 30px;">
+            <a href="/buy" class="btn btn-buy">🛒 Acquista Olive (105€)</a>
+            <a href="/produce_premium" class="btn btn-produce">🌿 Frangi Proprietà (Premium)</a>
+            <a href="/produce_evo" class="btn btn-produce">🫒 Frangi Mercato (EVO)</a>
+            <a href="/sell" class="btn btn-sell">💰 Vendi Tutto</a>
+        </div>
 
-<hr>
+        <div class="card evo-card">
+            <h3>Magazzino Olive</h3>
+            <p>Olive di produzione propria: <strong>{{ inventory.olives_own }} kg</strong></p>
+            <p>Olive acquistate: <strong>{{ inventory.olives_bought }} kg</strong></p>
+        </div>
 
-<p>Olive disponibili: <strong>{{ inventory.olives }}</strong> kg</p>
+        <div class="card premium-card">
+            <h3>🍃 Olio Vergine Biologico Premium</h3>
+            <p>Disponibile: <strong>{{ inventory.oil_virgin }} L</strong></p>
+            <p><small>Ottenuto esclusivamente dalle nostre piante, irrigate con acqua sorgiva.</small></p>
+        </div>
 
-<p>Olio Extra Vergine (EVO): <strong>{{ inventory.oil_extra }}</strong> L</p>
-<p>Olio Vergine: <strong>{{ inventory.oil_virgin }}</strong> L</p>
-<p>Sansa (scarti): <strong>{{ inventory.sansa }}</strong> kg</p>
+        <div class="card evo-card">
+            <h3>🫒 Olio Extra Vergine (EVO)</h3>
+            <p>Disponibile: <strong>{{ inventory.oil_extra }} L</strong></p>
+        </div>
 
-<p>Tempo totale di lavoro: <strong>{{ inventory.total_time }}</strong> min</p>
+        <p>♻️ <strong>Sansa di Oliva:</strong> {{ inventory.sansa }} kg (Residuo totale)</p>
+        <p>💶 <strong>Bilancio:</strong> {{ inventory.money }} €</p>
 
-{% if inventory.last_production %}
-    <p>Ultima operazione: <strong>{{ inventory.last_production }}</strong></p>
-{% endif %}
-
-<hr>
-
-<p>Portafoglio (Budget): <strong>{{ inventory.money }}</strong> €</p>
-
-<hr>
-
-<a href="/">Torna alla Home</a>
-</body>
-</html>
-
-
-
-<a href="/">Torna alla Home</a>
-
+        <h3>Storico dei Raccolti</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Anno</th>
+                    <th>Quantità (kg)</th>
+                    <th>Profitto Stimato</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in history %}
+                <tr>
+                    <td>{{ h.year }}</td>
+                    <td>{{ h.amount_kg }}</td>
+                    <td>{{ h.profit_estimate }} €</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
