@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
-# Definizione della tabella per il magazzino e le finanzeuv 
+# Definizione della tabella per il magazzino 
 class Stock(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     olives = db.Column(db.Float, default=500.0)
