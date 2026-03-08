@@ -35,26 +35,28 @@
 
         <p>♻️ <strong>Sansa di Oliva:</strong> {{ inventory.sansa }} kg (Residuo totale)</p>
         <p>💶 <strong>Bilancio:</strong> {{ inventory.money }} €</p>
-
-        <h3>Storico dei Raccolti</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Anno</th>
-                    <th>Quantità (kg)</th>
-                    <th>Profitto Stimato</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for h in history %}
-                <tr>
-                    <td>{{ h.year }}</td>
-                    <td>{{ h.amount_kg }}</td>
-                    <td>{{ h.profit_estimate }} €</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        
+        <h3>Cronologia della produzione (История производства)</h3>
+<table border="1" style="width:100%; border-collapse: collapse; text-align: center;">
+    <thead>
+        <tr style="background-color: #f2f2f2;">
+            <th>Data</th>
+            <th>Tipo di Oliva</th>
+            <th>Quantità (kg)</th>
+            <th>Olio Prodotto (L)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for event in history|reverse %}
+        <tr>
+            <td>{{ event.date }}</td>
+            <td>{{ event.olive_type }}</td>
+            <td>{{ event.quantity }}</td>
+            <td>{{ event.oil_produced }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
     </div>
 </body>
 </html>

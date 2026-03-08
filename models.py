@@ -28,12 +28,13 @@ class Stock(db.Model):
     last_production = db.Column(db.String(100), default="Nessuna")
     total_time = db.Column(db.Integer, default=0)
 
-# Tabella per la memorizzazione della storia del raccolto negli anni passati
+# Tabella per la memorizzazione della storia del raccolto
 class HarvestHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)
-    amount_kg = db.Column(db.Float, nullable=False)  # Quanti chilogrammi di olive sono state raccolte
-    profit_estimate = db.Column(db.Float)            # Stima della profit 
+    date = db.Column(db.String(50), nullable=False)     # Data della produzione
+    olive_type = db.Column(db.String(50), nullable=False)  # Tipo di oliva (Premium, EVO)
+    quantity = db.Column(db.Float, nullable=False)      # Quantità olive (kg)
+    oil_produced = db.Column(db.Float, nullable=False)  # Olio prodotto (L)
 
     def __repr__(self):
-        return f'<Raccolto {self.year}: {self.amount_kg}kg>'    
+        return f'<Evento {self.date}: {self.olive_type} - {self.oil_produced}L>'    
