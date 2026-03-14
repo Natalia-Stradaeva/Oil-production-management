@@ -2,8 +2,20 @@ import random
 from flask import Flask, render_template, redirect, url_for
 from datetime import datetime
 from models import db, Stock, Plantation, HarvestHistory
+from services.oil_logic import calculate_yield
+from utils.validators import (
+    can_afford, has_resources, 
+    COST_BUY_OLIVES, COST_PRODUCTION_BATCH,
+    PRICE_VIRGIN, PRICE_EXTRA, PRICE_SANSA
+)
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
+
+login_manager = LoginManager() # inizializziamo il login manager
+login_manager.init_app(app)
+login_manager.login_view = 'login' 
+
 # Configurazione del database SQLite
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -38,60 +50,90 @@ def status():
 @app.route('/buy')
 def buy():
     s = Stock.query.first()
-    cost = 105
-    if s.money >= cost:
-        s.money -= cost
+    
+    if can_afford(s.money, COST_BUY_OLIVES):
+        s.money -= COST_BUY_OLIVES
         s.olives_bought += 100
         db.session.commit()
     return redirect(url_for('status'))
 
 
-@app.route('/produce_premium') # soltanto con le proprie olive
+@app.route('/produce_premium')
 def produce_premium():
     s = Stock.query.first()
-    if s.olives_own >= 100 and s.money >= 16.5:
-        s.olives_own -= 100
-        s.money -= 16.5
-        s.oil_virgin += random.randint(14, 18) # Il nostro olio d'élite
-        # Prendiamo random.randint(35, 50) kg di sansa per ogni 100 kg di olive.
-        s.sansa += random.randint(35, 50)    # Sansa nel calderone generale
-        s.total_time += 150 # Lavoro manuale più lungo
+    batch_size = 100
+    if has_resources(s.olives_own, batch_size) and can_afford(s.money, COST_PRODUCTION_BATCH):
+        oil, sansa = calculate_yield("premium", batch_size)
+        
+        s.olives_own -= batch_size
+        s.money -= COST_PRODUCTION_BATCH
+        s.oil_virgin += oil
+        s.sansa += sansa
+        s.total_time += 150
         s.last_production = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
+
+        # --- ДОБАВЛЯЕМ ЗАПИСЬ В ИСТОРИЮ ---
+        new_event = HarvestHistory(
+            date=datetime.now().strftime('%d.%m.%Y'),
+            olive_type="Premium (Own)",
+            quantity=batch_size,
+            oil_produced=oil
+        )
+        db.session.add(new_event)
+        # ----------------------------------
+        
         db.session.commit()
     return redirect(url_for('status'))
 
 @app.route('/produce_evo')
 def produce_evo():
     s = Stock.query.first()
-    # Solo olive acquistate!
-    if s.olives_bought >= 100 and s.money >= 16.5:
-        s.olives_bought -= 100
-        s.money -= 16.5
-        s.oil_extra += random.randint(12, 16)
-        s.sansa += random.randint(35, 50)  # Sansa nel calderone generale
+    batch_size = 100
+    
+    # 1. Используем красивые валидаторы и константы из utils
+    if has_resources(s.olives_bought, batch_size) and can_afford(s.money, COST_PRODUCTION_BATCH):
+        # 2. Рассчитываем выход масла через логику в services
+        oil, sansa = calculate_yield("evo", batch_size)
+        
+        # 3. Обновляем склад и деньги
+        s.olives_bought -= batch_size
+        s.money -= COST_PRODUCTION_BATCH
+        s.oil_extra += oil
+        s.sansa += sansa
         s.total_time += 120
         s.last_production = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
+        
+        # 4. СОХРАНЯЕМ В ИСТОРИЮ (Это топливо для твоих будущих графиков!)
+        new_event = HarvestHistory(
+            date=datetime.now().strftime('%d.%m.%Y'),
+            olive_type="EVO (Purchased)",
+            quantity=batch_size,
+            oil_produced=oil
+        )
+        db.session.add(new_event)
+        
+        # 5. Фиксируем изменения в базе
         db.session.commit()
+        
     return redirect(url_for('status'))
 
 @app.route('/sell')
 def sell():
     s = Stock.query.first()
-    # Calcoliamo il reddito
-    # Premium (Virgin) * 25, Extra * 15, Sansa  * 0.20
-    income_oil = (s.oil_extra * 15) + (s.oil_virgin * 25)
-    income_sansa = (s.sansa * 0.20)
+    # Расчет через константы — теперь всё прозрачно!
+    income_oil = (s.oil_extra * PRICE_EXTRA) + (s.oil_virgin * PRICE_VIRGIN)
+    income_sansa = (s.sansa * PRICE_SANSA)
     
     total_income = income_oil + income_sansa
-    
     if total_income > 0:
         s.money += total_income
         s.oil_extra = 0
         s.oil_virgin = 0
         s.sansa = 0
         db.session.commit()
-        
     return redirect(url_for('status'))
+        
+    
 
 
 if __name__ == '__main__':
