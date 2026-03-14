@@ -6,6 +6,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+    <header style="display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 10px 20px; border-bottom: 1px solid #ddd;">
+        <span>Utente: <strong>{{ current_user.username }}</strong> ({{ current_user.role }})</span>
+        <a href="{{ url_for('logout') }}" style="color: #c0392b; text-decoration: none; font-weight: bold;">Esci</a>
+    </header>
     <div class="container">
         <h1>Gestione Oleificio - Eccellenza Campana</h1>
 
@@ -13,7 +17,10 @@
             <a href="/buy" class="btn btn-buy">🛒 Acquista Olive (105€)</a>
             <a href="/produce_premium" class="btn btn-produce">🌿 Frangi Proprietà (Premium)</a>
             <a href="/produce_evo" class="btn btn-produce">🫒 Frangi Mercato (EVO)</a>
-            <a href="/sell" class="btn btn-sell">💰 Vendi Tutto</a>
+
+            {% if current_user.role == 'admin' %}
+                <a href="/sell" class="btn btn-sell">💰 Vendi Tutto (Solo Admin)</a>
+            {% endif %}
         </div>
 
         <div class="card evo-card">
@@ -35,28 +42,28 @@
 
         <p>♻️ <strong>Sansa di Oliva:</strong> {{ inventory.sansa }} kg (Residuo totale)</p>
         <p>💶 <strong>Bilancio:</strong> {{ inventory.money }} €</p>
-        
-        <h3>Cronologia della produzione (История производства)</h3>
-<table border="1" style="width:100%; border-collapse: collapse; text-align: center;">
-    <thead>
-        <tr style="background-color: #f2f2f2;">
-            <th>Data</th>
-            <th>Tipo di Oliva</th>
-            <th>Quantità (kg)</th>
-            <th>Olio Prodotto (L)</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for event in history|reverse %}
-        <tr>
-            <td>{{ event.date }}</td>
-            <td>{{ event.olive_type }}</td>
-            <td>{{ event.quantity }}</td>
-            <td>{{ event.oil_produced }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+
+        <h3>Cronologia della produzione</h3>
+        <table border="1" style="width:100%; border-collapse: collapse; text-align: center;">
+            <thead>
+                <tr style="background-color: #f2f2f2;">
+                    <th>Data</th>
+                    <th>Tipo di Oliva</th>
+                    <th>Quantità (kg)</th>
+                    <th>Olio Prodotto (L)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in history|reverse %}
+                <tr>
+                    <td>{{ event.date }}</td>
+                    <td>{{ event.olive_type }}</td>
+                    <td>{{ event.quantity }}</td>
+                    <td>{{ event.oil_produced }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </body>
 </html>
