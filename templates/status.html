@@ -1,16 +1,9 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <title>Oleificio Natasha - Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <header style="display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; padding: 10px 20px; border-bottom: 1px solid #ddd;">
-        <span>Utente: <strong>{{ current_user.username }}</strong> ({{ current_user.role }})</span>
-        <a href="{{ url_for('logout') }}" style="color: #c0392b; text-decoration: none; font-weight: bold;">Esci</a>
-    </header>
-    <div class="container">
+{# Estende il modello base e inserisce il contenuto specifico della dashboard #}
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Eccellenza Campana{% endblock %}
+
+{% block content %}
         <h1>Gestione Oleificio - Eccellenza Campana</h1>
 
         <div class="actions" style="margin-bottom: 30px;">
@@ -64,6 +57,5 @@
                 {% endfor %}
             </tbody>
         </table>
-    </div>
-</body>
-</html>
+
+{% endblock %}

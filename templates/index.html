@@ -1,14 +1,11 @@
-<!DOCTYPE html>
+{# Estende il modello base e inserisce il contenuto specifico della dashboard #}
+{% extends "base.html" %} 
 
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<title>NS PureOil Production</title>
-</head>
-<body>
-<h1>NS PureOil Production</h1>
-<p>Benvenuti nel sistema di gestione!</p>
-<p>Stato: <strong style="color: green;">Attivo</strong></p>
-<a href="/status">Vai al magazzino</a>
-</body>
-</html>
+{% block title %}NS PureOil - Home{% endblock %}
+
+{% block content %}
+    <h1>NS PureOil Production</h1>
+    <p>Benvenuti nel sistema di gestione!</p>
+    <p>Stato: <strong style="color: green;">Attivo</strong></p>
+    <a href="/status" class="btn">Vai al magazzino</a>
+{% endblock %}

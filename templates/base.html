@@ -1,0 +1,35 @@
+{# Modello base che definisce la struttura comune (header, navbar) per tutte le pagine #}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Oleificio Natasha{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header style="display: flex;
+                   justify-content: space-between;
+                   align-items: center;
+                   background: #f8f9fa;
+                   padding: 10px 20px;
+                   border-bottom: 1px solid #ddd;">
+        <div>
+            <span>Utente: <strong>{{ current_user.username }}</strong></span>
+            <span style="margin-left: 10px;
+                        padding: 2px 8px;
+                        border-radius: 10px;
+                        font-size: 0.8em; color: white;
+                        background: {% if current_user.role == 'admin' %}#c0392b{% else %}#27ae60{% endif %};">
+                {{ current_user.role | upper }}
+            </span>
+        </div>
+        <a href="{{ url_for('logout') }}" style="color: #c0392b;
+                                               text-decoration: none;
+                                               font-weight: bold;">Esci</a>
+    </header>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
