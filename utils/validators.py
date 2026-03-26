@@ -2,7 +2,7 @@
 COST_BUY_OLIVES = 105.0
 COST_PRODUCTION_BATCH = 16.5
 PRICE_VIRGIN = 25.0
-PRICE_EXTRA = 15.0
+PRICE_EVO = 15.0
 PRICE_SANSA = 0.20
 
 def can_afford(current_money, cost):

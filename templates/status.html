@@ -4,58 +4,141 @@
 {% block title %}Dashboard - Eccellenza Campana{% endblock %}
 
 {% block content %}
-        <h1>Gestione Oleificio - Eccellenza Campana</h1>
+    <h1>Gestione Oleificio - Eccellenza Campana</h1>
 
-        <div class="actions" style="margin-bottom: 30px;">
-            <a href="/buy" class="btn btn-buy">🛒 Acquista Olive (105€)</a>
-            <a href="/produce_premium" class="btn btn-produce">🌿 Frangi Proprietà (Premium)</a>
-            <a href="/produce_evo" class="btn btn-produce">🫒 Frangi Mercato (EVO)</a>
-
-            {% if current_user.role == 'admin' %}
-                <a href="/sell" class="btn btn-sell">💰 Vendi Tutto (Solo Admin)</a>
-            {% endif %}
+    <div class="calendar-card" style="
+        background: #e9ecef;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    ">
+        <div>
+            <span style="font-size: 1.2em;">
+                📅 Mese corrente:
+                <strong>
+                    {% set mesi = ["Gennaio", "Febbraio", "Marzo", 
+                    "Aprile", "Maggio", "Giugno", "Luglio", "Agosto",
+                     "Settembre", "Ottobre", "Novembre", "Dicembre"] %}
+                    {{ mesi[land.current_month - 1] }}
+                </strong>
+            </span>
         </div>
+        <a href="/next_month" class="btn" style="
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+        ">
+            ⏭️ Passa al prossimo mese
+        </a>
+    </div>
 
-        <div class="card evo-card">
-            <h3>Magazzino Olive</h3>
-            <p>Olive di produzione propria: <strong>{{ inventory.olives_own }} kg</strong></p>
-            <p>Olive acquistate: <strong>{{ inventory.olives_bought }} kg</strong></p>
-        </div>
+    {# Blocco per la visualizzazione delle notifiche (messaggi flash) #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div style="
+                    padding: 10px;
+                    margin-bottom: 20px;
+                    border-radius: 5px;
+                    background-color: {% if category == 'success' %}#d4edda{% else %}#f8d7da{% endif %};
+                    color: {% if category == 'success' %}#155724{% else %}#721c24{% endif %};
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-        <div class="card premium-card">
-            <h3>🍃 Olio Vergine Biologico Premium</h3>
-            <p>Disponibile: <strong>{{ inventory.oil_virgin }} L</strong></p>
-            <p><small>Ottenuto esclusivamente dalle nostre piante, irrigate con acqua sorgiva.</small></p>
-        </div>
+    <div class="actions" style=
+                        "margin-bottom: 30px; 
+                        display: flex; 
+                        justify-content: center; 
+                        gap: 15px;
+                         flex-wrap: wrap;">
+        <a href="/buy" class="btn" style=
+                                   "background-color: #d35400; 
+                                    color: white; 
+                                    padding: 10px 15px;
+                                     border-radius: 8px; 
+                                     text-decoration: none;">
+            🛒 Acquista Olive (105€)
+        </a>
 
-        <div class="card evo-card">
-            <h3>🫒 Olio Extra Vergine (EVO)</h3>
-            <p>Disponibile: <strong>{{ inventory.oil_extra }} L</strong></p>
-        </div>
+        <a href="/produce_virgin" class="btn" style=
+                                            "background-color: #27ae60; 
+                                             color: white;
+                                              padding: 10px 15px; 
+                                              border-radius: 8px; 
+                                              text-decoration: none;">
+            🌿 Spremitura Vergine (Propria)
+        </a>
 
-        <p>♻️ <strong>Sansa di Oliva:</strong> {{ inventory.sansa }} kg (Residuo totale)</p>
-        <p>💶 <strong>Bilancio:</strong> {{ inventory.money }} €</p>
+        <a href="/produce_evo" class="btn" style=
+                                          "background-color: #2980b9; 
+                                           color: white; 
+                                           padding: 10px 15px; 
+                                           border-radius: 8px; 
+                                           text-decoration: none;">
+            🫒 Produzione EVO (Mercato)
+        </a>
 
-        <h3>Cronologia della produzione</h3>
-        <table border="1" style="width:100%; border-collapse: collapse; text-align: center;">
-            <thead>
-                <tr style="background-color: #f2f2f2;">
-                    <th>Data</th>
-                    <th>Tipo di Oliva</th>
-                    <th>Quantità (kg)</th>
-                    <th>Olio Prodotto (L)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for event in history|reverse %}
+        {% if current_user.role == 'admin' %}
+            <a href="/sell" class="btn" style=
+                                        "background-color: #c0392b;
+                                         color: white; 
+                                         padding: 10px 15px; 
+                                         border-radius: 8px; 
+                                         text-decoration: none;">
+                💰 Vendi Tutto
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="card evo-card">
+        <h3>Magazzino Olive</h3>
+        <p>Olive di produzione propria: <strong>{{ inventory.olives_own }} kg</strong></p>
+        <p>Olive acquistate: <strong>{{ inventory.olives_bought }} kg</strong></p>
+    </div>
+
+    <div class="card premium-card">
+        <h3>🍃 Olio Vergine Biologico Premium</h3>
+        <p>Disponibile: <strong>{{ inventory.oil_virgin }} L</strong></p>
+        <p><small>Ottenuto esclusivamente dalle nostre piante, irrigate con acqua sorgiva.</small></p>
+    </div>
+
+    <div class="card evo-card">
+        <h3>🫒 Olio Extra Vergine (EVO)</h3>
+        <p>Disponibile: <strong>{{ inventory.oil_extra }} L</strong></p>
+    </div>
+
+    <p>♻️ <strong>Sansa di Oliva:</strong> {{ inventory.sansa }} kg (Residuo totale)</p>
+    <p>💶 <strong>Bilancio:</strong> {{ inventory.money }} €</p>
+
+    <h3>Cronologia della produzione</h3>
+    <table border="1" style="width:100%; border-collapse: collapse; text-align: center;">
+        <thead>
+            <tr style="background-color: #f2f2f2;">
+                <th>Data</th>
+                <th>Tipo di Oliva</th>
+                <th>Quantità (kg)</th>
+                <th>Olio Prodotto (L)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in history|reverse %}
                 <tr>
                     <td>{{ event.date }}</td>
                     <td>{{ event.olive_type }}</td>
                     <td>{{ event.quantity }}</td>
                     <td>{{ event.oil_produced }}</td>
                 </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            {% endfor %}
+        </tbody>
+    </table>
 
 {% endblock %}

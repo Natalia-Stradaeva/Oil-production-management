@@ -1,3 +1,15 @@
+import random
+
+def get_random_harvest(hectares):
+    """
+    Calcola il raccolto annuale basato sugli ettari.
+    Resa media: 3000-6000 kg per ettaro.
+    """
+    yield_per_hectare = random.uniform(3000, 6000)
+    total_harvest = hectares * yield_per_hectare
+    return round(total_harvest, 2)
+
+
 def calculate_yield(olive_type, quantity):
     """
     calcolare l'uscita dell'olio e sansa basata sul tipo di olive.

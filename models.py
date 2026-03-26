@@ -13,6 +13,7 @@ class User(db.Model, UserMixin):
 class Plantation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     size_hectares = db.Column(db.Float, default=10.0)    # 10 piantagione propria
+    current_month = db.Column(db.Integer, default=1) # 1-12 per rappresentare i mesi
     irrigation_cost = db.Column(db.Float, default=500.0) # Costo dell'irrigazione per stagione
     workers_salary = db.Column(db.Float, default=2000.0) # Costo del salario dei lavoratori in novembre
     harvest_amount = db.Column(db.Float, default=0.0)    # Quantità di olive raccolte (in novembre)

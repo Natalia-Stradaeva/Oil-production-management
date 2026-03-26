@@ -2,11 +2,11 @@ import random
 from flask import Flask, render_template, redirect, url_for, flash, request
 from datetime import datetime
 from models import db, Stock, Plantation, HarvestHistory, User  
-from services.oil_logic import calculate_yield
+from services.oil_logic import calculate_yield, get_random_harvest
 from utils.validators import (
     can_afford, has_resources, 
     COST_BUY_OLIVES, COST_PRODUCTION_BATCH,
-    PRICE_VIRGIN, PRICE_EXTRA, PRICE_SANSA
+    PRICE_VIRGIN, PRICE_EVO, PRICE_SANSA
 )
 from flask_login import (LoginManager, UserMixin,
      login_user, login_required, 
@@ -101,9 +101,9 @@ def buy():
     return redirect(url_for('status'))
 
 
-@app.route('/produce_premium')
+@app.route('/produce_virgin')
 @login_required # Solo utenti loggati possono produrre
-def produce_premium():
+def produce_virgin():
     s = Stock.query.first()
     batch_size = 100
     if has_resources(s.olives_own, batch_size) and can_afford(s.money, COST_PRODUCTION_BATCH):
@@ -118,7 +118,7 @@ def produce_premium():
         # la storia del raccolto
         new_event = HarvestHistory(
             date=datetime.now().strftime('%d.%m.%Y'),
-            olive_type="Premium (Own)",
+            olive_type="Vergine (Propria)",
             quantity=batch_size,
             oil_produced=oil
         )
@@ -162,7 +162,7 @@ def produce_evo():
 def sell():
     s = Stock.query.first()
     # calcogliamo con constanti da utils
-    income_oil = (s.oil_extra * PRICE_EXTRA) + (s.oil_virgin * PRICE_VIRGIN)
+    income_oil = (s.oil_extra * PRICE_EVO) + (s.oil_virgin * PRICE_VIRGIN)
     income_sansa = (s.sansa * PRICE_SANSA)
     
     total_income = income_oil + income_sansa
@@ -173,7 +173,29 @@ def sell():
         s.sansa = 0
         db.session.commit()
     return redirect(url_for('status'))
+
+@app.route('/next_month')
+@login_required
+def next_month():
+    p = Plantation.query.first()
+    s = Stock.query.first()
+    
+    # 1. Aumentiamo il mese
+    p.current_month += 1
+    if p.current_month > 12:
+        p.current_month = 1 # Torna a gennaio
         
+    # 2. Logica di raccolta (Novembre = 11)
+    if p.current_month == 11:
+        new_olives = get_random_harvest(p.size_hectares)
+        s.olives_own += new_olives
+        flash(f"È novembre! Raccolti {new_olives} kg di olive proprie!", "success")
+    
+    # 3. Spese mensili (irrigazione)
+    s.money -= p.irrigation_cost
+    
+    db.session.commit()
+    return redirect(url_for('status'))       
     
 
 
