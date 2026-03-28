@@ -43,6 +43,15 @@ class HarvestHistory(db.Model):
     olive_type = db.Column(db.String(50), nullable=False)  # Tipo di oliva (Premium, EVO)
     quantity = db.Column(db.Float, nullable=False)      # Quantità olive (kg)
     oil_produced = db.Column(db.Float, nullable=False)  # Olio prodotto (L)
-
+    sansa_produced = db.Column(db.Float, default=0.0) # Sansa prodotta (kg)
     def __repr__(self):
-        return f'<Evento {self.date}: {self.olive_type} - {self.oil_produced}L>'    
+        return f'<Evento {self.date}: {self.olive_type} - {self.oil_produced}L>'   
+     
+# Tabella per la memorizzazione della storia delle vendite
+class SalesHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(50), nullable=False)
+    product_type = db.Column(db.String(50), nullable=False) # Virgin, EVO, Sansa
+    quantity = db.Column(db.Float, nullable=False)
+    price_unit = db.Column(db.Float, nullable=False)
+    total_revenue = db.Column(db.Float, nullable=False)   

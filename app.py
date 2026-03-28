@@ -1,7 +1,7 @@
 import random
 from flask import Flask, render_template, redirect, url_for, flash, request
 from datetime import datetime
-from models import db, Stock, Plantation, HarvestHistory, User  
+from models import db, Stock, Plantation, HarvestHistory, User, SalesHistory  
 from services.oil_logic import calculate_yield, get_random_harvest
 from utils.validators import (
     can_afford, has_resources, 
@@ -82,23 +82,27 @@ def status():
     inventory = Stock.query.first()
     factory_land = Plantation.query.first()
     history = HarvestHistory.query.all() # Elenco di tutti i passati raccolti
-    
+    sales_history = SalesHistory.query.all() # Elenco di tutte le vendite
     # Trasmettiamo tutto questo in HTML
     return render_template('status.html', 
                            inventory=inventory, 
                            land=factory_land, 
-                           history=history)
+                           history=history,
+                           sales_history=sales_history)
 
 @app.route('/buy')
 @login_required # Solo utenti loggati possono comprare
 def buy():
     s = Stock.query.first()
-    
     if can_afford(s.money, COST_BUY_OLIVES):
         s.money -= COST_BUY_OLIVES
         s.olives_bought += 100
         db.session.commit()
+        flash(f"Acquistati con successo 100 kg di olive!", "success") # feedback positivo
+    else:
+        flash("Non ci sono abbastanza soldi per acquistare olive!", "danger") # feedback negativo
     return redirect(url_for('status'))
+    
 
 
 @app.route('/produce_virgin')
@@ -106,7 +110,9 @@ def buy():
 def produce_virgin():
     s = Stock.query.first()
     batch_size = 100
-    if has_resources(s.olives_own, batch_size) and can_afford(s.money, COST_PRODUCTION_BATCH):
+    res = has_resources(s.olives_own, batch_size) # Prendiamo olive PROPRIE
+    afford = can_afford(s.money, COST_PRODUCTION_BATCH)
+    if res and afford:
         oil, sansa = calculate_yield("premium", batch_size)
         s.olives_own -= batch_size
         s.money -= COST_PRODUCTION_BATCH
@@ -120,10 +126,17 @@ def produce_virgin():
             date=datetime.now().strftime('%d.%m.%Y'),
             olive_type="Vergine (Propria)",
             quantity=batch_size,
-            oil_produced=oil
+            oil_produced=oil,
+            sansa_produced=sansa
         )
         db.session.add(new_event)
         db.session.commit()
+        flash(f"Abbiamo spremuto {oil}l di olio Virgin!", "success") # feedback positivo
+    else:
+        if not res:
+            flash("Non ci sono abbastanza olive proprie!", "danger") # feedback negativo
+        if not afford:
+            flash("Non ci sono abbastanza soldi per pagare la produzione!", "danger") # feedback negativo
     return redirect(url_for('status'))
 
 @app.route('/produce_evo')
@@ -131,9 +144,11 @@ def produce_virgin():
 def produce_evo():
     s = Stock.query.first()
     batch_size = 100
-    
+
+    res = has_resources(s.olives_bought, batch_size) # Prendiamo olive ACQUISTATE
+    afford = can_afford(s.money, COST_PRODUCTION_BATCH)
     # 1. Utilizzo di validatori e costanti da utils  
-    if has_resources(s.olives_bought, batch_size) and can_afford(s.money, COST_PRODUCTION_BATCH):
+    if res and afford:
         # 2. Calcolo della resa petrolifera utilizzando la logica nei servizi
         oil, sansa = calculate_yield("evo", batch_size)
         
@@ -150,28 +165,68 @@ def produce_evo():
             date=datetime.now().strftime('%d.%m.%Y'),
             olive_type="EVO (Purchased)",
             quantity=batch_size,
-            oil_produced=oil
+            oil_produced=oil,
+            sansa_produced=sansa
         )
         db.session.add(new_event)
         db.session.commit()
+        flash(f"Abbiamo spremuto {oil}l di marca EVO!", "success")  # feedback positivo
+    else:
+        if not res:
+            flash("Non ci sono abbastanza olive acquistate!", "danger") # feedback negativo
+        if not afford:
+            flash("Non ci sono abbastanza soldi per pagare la produzione!", "danger") # feedback negativo
         
     return redirect(url_for('status'))
 
-@app.route('/sell')
-@login_required # Solo utenti loggati possono vendere
-def sell():
+@app.route('/sell_product', methods=['POST'])
+@login_required
+def sell_product():
+    product = request.form.get('product_type')
+    try:
+        amount = float(request.form.get('amount', 0))
+    except ValueError:
+        flash("Inserisci un numero valido!", "danger")
+        return redirect(url_for('status'))
+
     s = Stock.query.first()
-    # calcogliamo con constanti da utils
-    income_oil = (s.oil_extra * PRICE_EVO) + (s.oil_virgin * PRICE_VIRGIN)
-    income_sansa = (s.sansa * PRICE_SANSA)
+    price = 0
     
-    total_income = income_oil + income_sansa
-    if total_income > 0:
-        s.money += total_income
-        s.oil_extra = 0
-        s.oil_virgin = 0
-        s.sansa = 0
+    # Determiniamo il prezzo e verifichiamo la disponibilità del prodotto
+    if product == 'Virgin':
+        price = PRICE_VIRGIN
+        stock_attr = 'oil_virgin'
+    elif product == 'EVO':
+        price = PRICE_EVO
+        stock_attr = 'oil_extra'
+    elif product == 'Sansa':
+        price = PRICE_SANSA
+        stock_attr = 'sansa'
+    else:
+        flash("Prodotto non valido!", "danger")
+        return redirect(url_for('status'))
+
+    current_stock = getattr(s, stock_attr)
+
+    if amount > 0 and current_stock >= amount:
+        revenue = amount * price
+        setattr(s, stock_attr, current_stock - amount)
+        s.money += revenue
+        
+        # Salviamo nella storia delle vendite
+        new_sale = SalesHistory(
+            date=datetime.now().strftime('%d.%m.%Y %H:%M'),
+            product_type=product,
+            quantity=amount,
+            price_unit=price,
+            total_revenue=revenue
+        )
+        db.session.add(new_sale)
         db.session.commit()
+        flash(f"Venduti {amount} unità di {product} per {revenue:.2f}€!", "success")
+    else:
+        flash(f"Quantità insufficiente di {product}!", "danger")
+        
     return redirect(url_for('status'))
 
 @app.route('/next_month')
@@ -195,7 +250,19 @@ def next_month():
     s.money -= p.irrigation_cost
     
     db.session.commit()
-    return redirect(url_for('status'))       
+    return redirect(url_for('status'))  
+
+@app.route('/refill_money')
+@login_required
+def refill_money():
+    if current_user.role == 'admin':
+        s = Stock.query.first()
+        s.money += 5000.0
+        db.session.commit()
+        flash("La banca ha erogato un sussidio di 5000€ per Oleificio Natalia! 💰", "success")
+    else:
+        flash("Solo l'amministratore può richiedere un sussidio!", "danger")
+    return redirect(url_for('status'))     
     
 
 

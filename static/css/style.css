@@ -39,6 +39,8 @@ h1, h3 { color: #556b2f; }
     border-radius: 5px;
     font-weight: bold;
     transition: 0.3s;
+    border: none;      /* Rimuove il bordo grigio standard dal pulsante */
+    cursor: pointer;    /* Trasforma il cursore in un "dito" quando ci si passa sopra con il mouse.*/
 }
 
 .btn-buy { background: #3498db; color: white; }
@@ -49,3 +51,113 @@ h1, h3 { color: #556b2f; }
 table { width: 100%; border-collapse: collapse; margin-top: 20px; }
 th { background: #556b2f; color: white; padding: 12px; }
 td { border-bottom: 1px solid #ddd; padding: 10px; }
+.sales-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 20px; 
+    background-color: white; 
+}
+/* Sezione Materie Prime */
+.raw-materials-banner {
+    background: #fdf2e9; 
+    border: 1px solid #e67e22; 
+    padding: 15px; 
+    border-radius: 10px; 
+    margin-bottom: 25px; 
+    display: flex; 
+    justify-content: space-around; 
+    align-items: center;
+}
+
+.raw-item { text-align: center; }
+.raw-item strong { color: #d35400; font-size: 1.2em; }
+.raw-value { font-size: 1.4em; margin-left: 10px; font-weight: bold; }
+.divider-v { border-left: 1px solid #e67e22; height: 30px; }
+
+/* Grid delle card di prodotto */
+.inventory-grid {
+    display: flex; 
+    gap: 20px; 
+    flex-wrap: wrap; 
+    margin-bottom: 30px;
+}
+
+.inventory-card {
+    flex: 1; 
+    min-width: 250px; 
+    background: white; 
+    padding: 15px; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.card-virgin { border-top: 5px solid #27ae60; }
+.card-evo { border-top: 5px solid #2980b9; }
+.card-sansa { border-top: 5px solid #95a5a6; }
+
+.card-virgin h3 { color: #27ae60; margin-top: 0; }
+.card-evo h3 { color: #2980b9; margin-top: 0; }
+.card-sansa h3 { color: #7f8c8d; margin-top: 0; }
+
+/* Forme di vendita all'interno delle card */
+.sale-form {
+    display: flex; 
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.input-sell {
+    width: 80px; 
+    border: 1px solid #ccc; 
+    border-radius: 4px;
+    padding: 5px;
+}
+
+/* Banner di equilibrio */
+.balance-banner {
+    background: #2c3e50; 
+    color: white; 
+    padding: 15px; 
+    border-radius: 8px; 
+    margin-bottom: 30px; 
+    text-align: center;
+    font-size: 1.5em;
+}
+
+/* Sezione del calendario */
+.calendar-card {
+    background: #e9ecef;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Blocco di notifiche */
+.alert {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+.alert-success { background-color: #d4edda; color: #155724; }
+.alert-error { background-color: #f8d7da; color: #721c24; }
+
+/* Bottoni di azioni di diversi colori */
+.actions-container {
+    margin-bottom: 30px; 
+    display: flex; 
+    justify-content: center; 
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+/* Bottoni di diversi colori */
+.btn-blue { background-color: #3498db; color: white; }
+.btn-orange { background-color: #d35400; color: white; }
+.btn-green { background-color: #27ae60; color: white; }
+.btn-dark-blue { background-color: #2980b9; color: white; }
+.btn-red { background-color: #c0392b; color: white; }
+.btn-yellow { background-color: #f1c40f; color: black; }
+.btn-sansa { background-color: #95a5a6; color: white; }
