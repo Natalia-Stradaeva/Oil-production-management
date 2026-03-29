@@ -76,19 +76,21 @@ td { border-bottom: 1px solid #ddd; padding: 10px; }
 
 /* Grid delle card di prodotto */
 .inventory-grid {
-    display: flex; 
-    gap: 20px; 
-    flex-wrap: wrap; 
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;  
     margin-bottom: 30px;
+    align-items: start;
 }
 
 .inventory-card {
-    flex: 1; 
-    min-width: 250px; 
     background: white; 
-    padding: 15px; 
+    padding: 20px; 
     border-radius: 10px; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+    display: flex;
+    flex-direction: column; 
+    gap: 10px;
 }
 
 .card-virgin { border-top: 5px solid #27ae60; }
@@ -161,3 +163,64 @@ td { border-bottom: 1px solid #ddd; padding: 10px; }
 .btn-red { background-color: #c0392b; color: white; }
 .btn-yellow { background-color: #f1c40f; color: black; }
 .btn-sansa { background-color: #95a5a6; color: white; }
+
+/* Stili aggiuntivi per la bellezza */
+.inventory-card p {
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+.inventory-card strong {
+    font-size: 1.1em;
+    color: #333;
+}
+
+/* Effetto per i pulsanti di imbottigliamento */
+.btn-orange {
+    background-color: #e67e22;
+    color: white;
+    display: block;
+    text-align: center;
+}
+
+/* 1. Делаем заголовки и текст аккуратными */
+.inventory-card h3 {
+    margin-bottom: 5px;
+}
+.inventory-card p {
+    margin: 2px 0;
+    font-size: 0.95em;
+}
+
+/* 2. Стили для кнопки Imbottiglia (она должна быть на всю ширину) */
+.inventory-card .btn-orange {
+    display: block; /* Занимает всю ширину */
+    width: 100%; /* На всякий случай */
+    text-align: center;
+    margin-top: 10px; /* Отступ сверху */
+    margin-bottom: 15px; /* Отступ снизу, чтобы отделиться от формы продажи */
+    box-sizing: border-box; /* Чтобы padding не раздувал ширину */
+}
+
+/* 3. Стили для формы продажи (Vendi) */
+.sale-form {
+    display: flex; 
+    gap: 8px; /* Чуть больше места между полем ввода и кнопкой */
+    margin-top: auto; /* Прижимает форму к низу карточки, если карточки разной высоты */
+    border-top: 1px solid #eee; /* Легкая разделительная черта */
+    padding-top: 15px; /* Отступ от черты */
+}
+
+/* 4. Поле ввода литров делаем чуть шире */
+.input-sell {
+    flex: 1; /* Занимает все доступное место */
+    min-width: 70px;
+    border: 1px solid #ccc; 
+    border-radius: 4px;
+    padding: 8px; /* Удобнее вводить */
+}
+
+/* 5. Кнопка Vendi внутри формы */
+.sale-form .btn-green {
+    padding: 8px 15px; /* Сверху/снизу, Слева/справа */
+}

@@ -24,10 +24,18 @@ class Stock(db.Model):
     olives_own = db.Column(db.Float, default=0.0)   # proprie (per olio vergine)
     olives_bought = db.Column(db.Float, default=0.0) # acquistate (per olio extra)
     
-    # olio prodotto
+    # Olio sfuso (in litri)
     oil_extra = db.Column(db.Float, default=0.0)
     oil_virgin = db.Column(db.Float, default=0.0)
     sansa = db.Column(db.Float, default=0.0)
+
+    # Materiali di imballaggio
+    bottles = db.Column(db.Integer, default=0) # bottiglie da 1 litro
+    corks = db.Column(db.Integer, default=0)   # Tappi di bottiglia
+    
+    # Prodotti finiti (bottiglie da 1 litro)
+    bottled_extra = db.Column(db.Integer, default=0) 
+    bottled_virgin = db.Column(db.Integer, default=0)
     
     # Finanze
     money = db.Column(db.Float, default=1000.0)
@@ -35,6 +43,16 @@ class Stock(db.Model):
     # Statistica
     last_production = db.Column(db.String(100), default="Nessuna")
     total_time = db.Column(db.Integer, default=0)
+
+class ProductionLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(50))
+    operation = db.Column(db.String(100)) # "Spremitura", "Filtrazione", "Imbottigliamento"
+    oil_type = db.Column(db.String(50))
+    quantity = db.Column(db.Float)
+    time_spent = db.Column(db.Integer) #  Tempo in minuti
+    def __repr__(self):
+        return f'<Log {self.date}: {self.operation} - {self.quantity}L>'    
 
 # Tabella per la memorizzazione della storia del raccolto
 class HarvestHistory(db.Model):
@@ -44,6 +62,7 @@ class HarvestHistory(db.Model):
     quantity = db.Column(db.Float, nullable=False)      # Quantità olive (kg)
     oil_produced = db.Column(db.Float, nullable=False)  # Olio prodotto (L)
     sansa_produced = db.Column(db.Float, default=0.0) # Sansa prodotta (kg)
+    weather = db.Column(db.String(50), default="Soleggiato")
     def __repr__(self):
         return f'<Evento {self.date}: {self.olive_type} - {self.oil_produced}L>'   
      

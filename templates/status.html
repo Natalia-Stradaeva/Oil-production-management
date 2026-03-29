@@ -31,11 +31,12 @@
 
     <div class="actions-container">
         <a href="/buy" class="btn btn-orange">🛒 Acquista Olive (105€)</a>
-        <a href="/produce_virgin" class="btn btn-green">🌿 Spremitura Vergine (Propria)</a>
-        <a href="/produce_evo" class="btn btn-dark-blue">🫒 Produzione EVO (Mercato)</a>
+        <a href="/produce_virgin" class="btn btn-green"> Spremitura Vergine (Propria)</a>
+        <a href="/produce_evo" class="btn btn-dark-blue"> Produzione EVO (Mercato)</a>
+        <a href="/buy_packaging" class="btn btn-blue"> Compra Kit Imballaggio (50L)</a>
 
         {% if current_user.role == 'admin' %}
-            <a href="/sell" class="btn btn-red">💰 Vendi Tutto</a>
+            <a href="/sell" class="btn btn-red"> Vendi Tutto</a>
             <a href="/refill_money" class="btn btn-yellow">🏦 Ottenere sussidio (5000€)</a>
         {% endif %}
     </div>
@@ -43,40 +44,57 @@
     {# magazzino di olive #}
     <div class="raw-materials-banner">
         <div class="raw-item">
-            <span>🚜 <strong>Olive Proprie:</strong></span>
+            <span> <strong>Olive Proprie:</strong></span>
             <span class="raw-value">{{ inventory.olives_own }} kg</span>
         </div>
         <div class="divider-v"></div>
         <div class="raw-item">
-            <span>🛒 <strong>Olive Acquistate:</strong></span>
+            <span> <strong>Olive Acquistate:</strong></span>
             <span class="raw-value">{{ inventory.olives_bought }} kg</span>
         </div>
     </div>
 
+    <div class="raw-materials-banner" style="background: #e8f4f8; border-color: #3498db; margin-top: -15px;">
+    <div class="raw-item">
+        <span> <strong>Bottiglie vuote:</strong></span>
+        <span class="raw-value">{{ inventory.bottles }} шт.</span>
+    </div>
+    <div class="divider-v" style="border-color: #3498db;"></div>
+    <div class="raw-item">
+        <span> <strong>Tappi:</strong></span>
+        <span class="raw-value">{{ inventory.corks }} шт.</span>
+    </div>
+</div>
+
+
     {# magazzino di olio #}
     <div class="inventory-grid">
         <div class="inventory-card card-virgin">
-            <h3>🍃 Olio Virgin</h3>
+            <h3> Olio Virgin</h3>
             <p>In magazzino: <strong>{{ inventory.oil_virgin }} L</strong></p>
             <form action="/sell_product" method="POST" class="sale-form">
                 <input type="hidden" name="product_type" value="Virgin">
                 <input type="number" name="amount" step="10" min="10" max="{{ inventory.oil_virgin }}" placeholder="Litri" required class="input-sell">
+                <p> Bottiglie da 1L pronte: <strong>{{ inventory.bottled_virgin }} unità</strong></p>
+                <a href="/bottling/virgin" class="btn btn-orange" style="font-size: 0.8em; margin-bottom: 10px;"> Imbottiglia 1L</a>
                 <button type="submit" class="btn btn-green">Vendi</button>
             </form>
         </div>
 
         <div class="inventory-card card-evo">
-            <h3>🫒 Olio EVO</h3>
+            <h3> Olio EVO</h3>
             <p>In magazzino: <strong>{{ inventory.oil_extra }} L</strong></p>
             <form action="/sell_product" method="POST" class="sale-form">
                 <input type="hidden" name="product_type" value="EVO">
                 <input type="number" name="amount" step="10" min="10" max="{{ inventory.oil_extra }}" placeholder="Litri" required class="input-sell">
+                <p> Bottiglie da 1L pronte: <strong>{{ inventory.bottled_extra }} unità</strong></p>
+                <a href="/bottling/extra" class="btn btn-orange" style="font-size: 0.8em; margin-bottom: 10px;"> Imbottiglia 1L</a>
                 <button type="submit" class="btn btn-green">Vendi</button>
             </form>
         </div>
 
         <div class="inventory-card card-sansa">
-            <h3>♻️ Sansa</h3>
+            <h3> Sansa</h3>
             <p>In magazzino: <strong>{{ inventory.sansa }} kg</strong></p>
             <form action="/sell_product" method="POST" class="sale-form">
                 <input type="hidden" name="product_type" value="Sansa">
@@ -87,7 +105,7 @@
     </div>
 
     <div class="balance-banner">
-        💶 <strong>Bilancio: {{ inventory.money }} €</strong>
+         <strong>Bilancio: {{ inventory.money }} €</strong>
     </div>
 
     {# Tabella della cronologia #}
@@ -131,9 +149,9 @@
             <tr>
                 <td>{{ sale.date }}</td>
                 <td>
-                    {% if sale.product_type == 'Virgin' %}🍃 Virgin
-                    {% elif sale.product_type == 'EVO' %}🫒 EVO
-                    {% else %}♻️ Sansa {% endif %}
+                    {% if sale.product_type == 'Virgin' %} Virgin
+                    {% elif sale.product_type == 'EVO' %} EVO
+                    {% else %} Sansa {% endif %}
                 </td>
                 <td>{{ sale.quantity }}</td>
                 <td>{{ sale.price_unit }} €</td>
@@ -148,5 +166,28 @@
     </table>
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    
+
+<h3 style="margin-top: 40px;">⏱️ Log di Produzione (Dettagli Tecnici)</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Operazione</th>
+            <th>Tipo Olio</th>
+            <th>Quantità (L)</th>
+            <th>Tempo (min)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in production_logs|reverse %} <tr>
+            <td>{{ log.date }}</td>
+            <td>{{ log.operation }}</td>
+            <td>{{ log.oil_type }}</td>
+            <td>{{ log.quantity }}</td>
+            <td>{{ log.time_spent }} min</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}

@@ -1,5 +1,31 @@
 import random
 
+def get_weather_impact():
+    """Condizioni meteorologiche imprevedibili per la raccolta delle olive"""
+    weather_types = [
+        {"type": "Soleggiato", "impact": 1.2, "msg": "Bel tempo! Il raccolto è superiore alla media."},
+        {"type": "Variabile", "impact": 1.0, "msg": "Raccolto normale."},
+        {"type": "Piovoso", "impact": 0.7, "msg": "Pioggia! Il raccolto è difficoltoso, la produzione è inferiore."},
+        {"type": "Tempesta", "impact": 0.3, "msg": "Tempesta! Una grande parte delle olive è danneggiata."}
+    ]
+    return random.choice(weather_types)
+
+def calculate_bottling(liters, bottles_available, corks_available):
+    """
+    Imbottigliamento dell'olio in bottiglie da 1 litro.
+    1 litro di olio + 1 bottiglia + 1 tappo di sughero = 1 prodotto finito.
+    """
+    # Prendiamo un numero intero di litri
+    max_by_oil = int(liters)
+    
+    # Troviamo il limite basato sul risorsa più limitata
+    can_bottle = min(max_by_oil, bottles_available, corks_available)
+    
+    # Residui oleosi dopo l'imbottigliamento
+    remaining_oil = round(liters - can_bottle, 2)
+    
+    return can_bottle, remaining_oil
+
 def get_random_harvest(hectares):
     """
     Calcola il raccolto annuale basato sugli ettari.
