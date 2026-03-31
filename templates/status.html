@@ -30,14 +30,14 @@
     {% endwith %}
 
     <div class="actions-container">
-        <a href="/buy" class="btn btn-orange">🛒 Acquista Olive (105€)</a>
+        <a href="/buy" class="btn btn-orange"> Acquista Olive (105€)</a>
         <a href="/produce_virgin" class="btn btn-green"> Spremitura Vergine (Propria)</a>
         <a href="/produce_evo" class="btn btn-dark-blue"> Produzione EVO (Mercato)</a>
         <a href="/buy_packaging" class="btn btn-blue"> Compra Kit Imballaggio (50L)</a>
 
         {% if current_user.role == 'admin' %}
             <a href="/sell" class="btn btn-red"> Vendi Tutto</a>
-            <a href="/refill_money" class="btn btn-yellow">🏦 Ottenere sussidio (5000€)</a>
+            <a href="/refill_money" class="btn btn-yellow"> Ottenere sussidio (5000€)</a>
         {% endif %}
     </div>
 
@@ -133,7 +133,7 @@
         </tbody>
     </table>
 
-    <h3 style="margin-top: 40px;">📜 Registro delle Vendite</h3>
+    <h3 style="margin-top: 40px;"> Registro delle Vendite</h3>
     <table class="sales-table">
         <thead>
             <tr>
@@ -167,7 +167,7 @@
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
-<h3 style="margin-top: 40px;">⏱️ Log di Produzione (Dettagli Tecnici)</h3>
+<h3 style="margin-top: 40px;"> Log di Produzione (Dettagli Tecnici)</h3>
 <table>
     <thead>
         <tr>

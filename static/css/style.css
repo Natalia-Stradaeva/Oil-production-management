@@ -1,20 +1,47 @@
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f9fbf7;
-    color: #333;
-    line-height: 1.6;
-    margin: 40px;
+    background-image: url('/static/images/background.jpg');
+    background-size: cover;          /* Espandi a schermo intero */
+    background-position: center;     /* Centro */
+    background-attachment: fixed;    /* Blocco sulla scroll */
+    margin: 0;
+    padding: 0;
 }
 
-h1, h3 { color: #556b2f; }
+
+h1 { 
+    color: #699d0f; 
+    text-align: center; 
+    font-size: 2.5em; 
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8); 
+    margin-top: 20px;
+}
+
+h3 { 
+    color: #2c3e50; 
+    background: rgba(255, 255, 255, 0.7); 
+    display: inline-block; 
+    padding: 5px 15px; 
+    border-radius: 5px; 
+}
 
 .container {
-    max-width: 900px;
-    margin: auto;
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    
+    background: rgba(255, 255, 255, 0.15); /* Sfondo bianco con trasparenza del 25%. */
+     backdrop-filter: blur(10px); /* Aggiunta di un effetto sfocatura (Frosted Glass) */
+    -webkit-backdrop-filter: blur(10px); /* Для поддержки в Safari */
+    
+    /* 3. Добавляем тонкую рамку, чтобы подчеркнуть грани стекла */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    
+    /* 4. Мягкие тени для объема */
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    
+    
+    border-radius: 15px; /* Скругленные углы */
+    padding: 20px;       /* Внутренние отступы */
+    max-width: 900px;    /* 1. Ограничиваем ширину (можно 800px или 1000px, как тебе нравится) */
+    width: 90%;          /* 2. На маленьких экранах он займет 90% ширины, чтобы не вылезать за края */
+    margin: 50px auto;   /* Отступы сверху/снизу и центрирование */
 }
 
 .card {
@@ -48,7 +75,13 @@ h1, h3 { color: #556b2f; }
 .btn-sell { background: #e67e22; color: white; }
 .btn:hover { opacity: 0.8; transform: translateY(-2px); }
 
-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 20px; 
+    background-color: white; 
+    color: black;            
+}
 th { background: #556b2f; color: white; padding: 12px; }
 td { border-bottom: 1px solid #ddd; padding: 10px; }
 .sales-table { 
