@@ -40,7 +40,10 @@
             <a href="/refill_money" class="btn btn-yellow"> Ottenere sussidio (5000€)</a>
         {% endif %}
     </div>
-
+    <div class="balance-banner">
+         <strong>Bilancio: {{ inventory.money }} €</strong>
+    </div>
+    
     {# magazzino di olive #}
     <div class="raw-materials-banner">
         <div class="raw-item">
@@ -55,41 +58,59 @@
     </div>
 
     <div class="raw-materials-banner" style="background: #e8f4f8; border-color: #3498db; margin-top: -15px;">
-    <div class="raw-item">
-        <span> <strong>Bottiglie vuote:</strong></span>
-        <span class="raw-value">{{ inventory.bottles }} шт.</span>
+        <div class="raw-item">
+            <span> <strong>Bottiglie vuote:</strong></span>
+            <span class="raw-value">{{ inventory.bottles }} шт.</span>
+        </div>
+        <div class="divider-v" style="border-color: #3498db;"></div>
+        <div class="raw-item">
+            <span> <strong>Tappi:</strong></span>
+            <span class="raw-value">{{ inventory.corks }} шт.</span>
+        </div>
+         <div class="divider-v" style="border-color: #3498db;"></div>
     </div>
-    <div class="divider-v" style="border-color: #3498db;"></div>
-    <div class="raw-item">
-        <span> <strong>Tappi:</strong></span>
-        <span class="raw-value">{{ inventory.corks }} шт.</span>
-    </div>
-</div>
+
 
 
     {# magazzino di olio #}
-    <div class="inventory-grid">
+     <div class="inventory-grid">
         <div class="inventory-card card-virgin">
             <h3> Olio Virgin</h3>
-            <p>In magazzino: <strong>{{ inventory.oil_virgin }} L</strong></p>
+            <p>In magazzino (sfuso): <strong>{{ inventory.oil_virgin }} L</strong></p>
+    
             <form action="/sell_product" method="POST" class="sale-form">
                 <input type="hidden" name="product_type" value="Virgin">
-                <input type="number" name="amount" step="10" min="10" max="{{ inventory.oil_virgin }}" placeholder="Litri" required class="input-sell">
-                <p> Bottiglie da 1L pronte: <strong>{{ inventory.bottled_virgin }} unità</strong></p>
-                <a href="/bottling/virgin" class="btn btn-orange" style="font-size: 0.8em; margin-bottom: 10px;"> Imbottiglia 1L</a>
-                <button type="submit" class="btn btn-green">Vendi</button>
+                <input type="number" name="amount" step="1" max="{{ inventory.oil_virgin }}" placeholder="Litri sfusi" required class="input-sell">
+                <button type="submit" class="btn btn-green">Vendi Olio</button>
+            </form>
+
+            <hr> <p> Bottiglie pronte: <strong>{{ inventory.bottled_virgin }} unità</strong></p>
+            <a href="/bottling/virgin" class="btn btn-orange" style="font-size: 0.8em; width: 100%;"> Imbottiglia 1L</a>
+    
+            <form action="/sell_product" method="POST" class="sale-form" style="margin-top: 10px;">
+                <input type="hidden" name="product_type" value="Virgin"> <input type="number" name="amount" step="1" max="{{ inventory.bottled_virgin }}" placeholder="N. Bottiglie" required class="input-sell">
+                <button type="submit" class="btn btn-dark-blue">Vendi Bottiglie</button>
             </form>
         </div>
 
         <div class="inventory-card card-evo">
             <h3> Olio EVO</h3>
-            <p>In magazzino: <strong>{{ inventory.oil_extra }} L</strong></p>
+            <p>In magazzino (sfuso): <strong>{{ inventory.oil_extra }} L</strong></p>
             <form action="/sell_product" method="POST" class="sale-form">
                 <input type="hidden" name="product_type" value="EVO">
-                <input type="number" name="amount" step="10" min="10" max="{{ inventory.oil_extra }}" placeholder="Litri" required class="input-sell">
-                <p> Bottiglie da 1L pronte: <strong>{{ inventory.bottled_extra }} unità</strong></p>
-                <a href="/bottling/extra" class="btn btn-orange" style="font-size: 0.8em; margin-bottom: 10px;"> Imbottiglia 1L</a>
-                <button type="submit" class="btn btn-green">Vendi</button>
+                <input type="number" name="amount" step="1" max="{{ inventory.oil_extra }}" placeholder="Litri sfusi" required class="input-sell">
+                <button type="submit" class="btn btn-green">Vendi Olio</button>
+            </form>
+            <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #34495e;">
+            <p> Bottiglie da 1L pronte: <strong>{{ inventory.bottled_extra }} unità</strong></p>
+            <a href="/bottling/extra" class="btn btn-orange" style="font-size: 0.8em; width: 100%; margin-bottom: 10px; display: block; text-align: center;"> 
+                Imbottiglia 1L
+            </a>
+    
+            <form action="/sell_product" method="POST" class="sale-form">
+                <input type="hidden" name="product_type" value="Bottled_EVO"> 
+                <input type="number" name="amount" step="1" max="{{ inventory.bottled_extra }}" placeholder="N. Bottiglie" required class="input-sell">
+                <button type="submit" class="btn btn-dark-blue" style="background-color: #2c3e50;">Vendi Bottiglie</button>
             </form>
         </div>
 
@@ -104,9 +125,7 @@
         </div>
     </div>
 
-    <div class="balance-banner">
-         <strong>Bilancio: {{ inventory.money }} €</strong>
-    </div>
+    
 
     {# Tabella della cronologia #}
     <h3>Cronologia della produzione</h3>
@@ -189,5 +208,5 @@
         {% endfor %}
     </tbody>
 </table>
-
+</div>
 {% endblock %}

@@ -113,20 +113,16 @@ def buy():
 @app.route('/produce_virgin')
 @login_required 
 def produce_virgin():
-    from models import ProductionLog, HarvestHistory # import interno per evitare problemi di importazione circolare
+    from models import ProductionLog, HarvestHistory 
     s = Stock.query.first()
     batch_size = 100
-    
-    # 1. Controlli
     res = has_resources(s.olives_own, batch_size) 
     afford = can_afford(s.money, COST_PRODUCTION_BATCH)
     
     if res and afford:
-        # 2. Logica di calcolo
         oil, sansa = calculate_yield("premium", batch_size)
         process_time = TIME_SPREMITURA + TIME_FILTRAZIONE
         
-        # 3. Aggiornamento dello stock
         s.olives_own -= batch_size
         s.money -= COST_PRODUCTION_BATCH
         s.oil_virgin += oil
@@ -134,16 +130,15 @@ def produce_virgin():
         s.total_time += process_time
         s.last_production = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
 
-        # 4. Salviamo nella storia del raccolto (HarvestHistory)
+        # ИСПРАВЛЕНО: Добавлен параметр sansa_produced
         new_event = HarvestHistory(
             date=datetime.now().strftime('%d.%m.%Y'),
             olive_type="Vergine (Propria)",
             quantity=batch_size,
-            oil_produced=oil
-            
+            oil_produced=oil,
+            sansa_produced=sansa 
         )
         
-        # 5. Logghiamo il processo di produzione (ProductionLog)
         log = ProductionLog(
             date=s.last_production,
             operation="Spremitura + Filtrazione",
@@ -155,36 +150,25 @@ def produce_virgin():
         db.session.add(new_event)
         db.session.add(log)
         db.session.commit()
-        
-        flash(f"Successo! Prodotti {oil}L di Virgin in {process_time} min.", "success")
-    
+        flash(f"Successo! Prodotti {oil}L di Virgin e {sansa}kg di Sansa", "success")
     else:
-        # Gestione degli errori 
-        if not res:
-            flash("Non ci sono abbastanza olive proprie!", "danger")
-        if not afford:
-            flash("Non ci sono abbastanza soldi per la produzione!", "danger")
-            
+        if not res: flash("Non ci sono abbastanza olive proprie!", "danger")
+        if not afford: flash("Soldi insufficienti!", "danger")
     return redirect(url_for('status'))
 
 @app.route('/produce_evo')
 @login_required 
 def produce_evo():
-    from models import ProductionLog, HarvestHistory # import interno
+    from models import ProductionLog, HarvestHistory 
     s = Stock.query.first()
     batch_size = 100
-    
-    # 1. Controlli (utilizziamo olive acquistate)
     res = has_resources(s.olives_bought, batch_size) 
     afford = can_afford(s.money, COST_PRODUCTION_BATCH)
     
     if res and afford:
-        # 2. Logica di calcolo (EVO)
         oil, sansa = calculate_yield("evo", batch_size)
-        # Il tempo di produzione 
         process_time = TIME_SPREMITURA + TIME_FILTRAZIONE
         
-        # 3. Aggiornamento dello stock
         s.olives_bought -= batch_size
         s.money -= COST_PRODUCTION_BATCH
         s.oil_extra += oil  
@@ -192,15 +176,15 @@ def produce_evo():
         s.total_time += process_time
         s.last_production = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
 
-        # 4. Salviamo nella storia (HarvestHistory)
+        # ИСПРАВЛЕНО: Добавлен параметр sansa_produced
         new_event = HarvestHistory(
             date=datetime.now().strftime('%d.%m.%Y'),
             olive_type="EVO (Purchased)",
             quantity=batch_size,
-            oil_produced=oil
+            oil_produced=oil,
+            sansa_produced=sansa
         )
         
-        # 5. Logghiamo il processo di produzione (ProductionLog)
         log = ProductionLog(
             date=s.last_production,
             operation="Spremitura + Filtrazione (EVO)",
@@ -212,16 +196,7 @@ def produce_evo():
         db.session.add(new_event)
         db.session.add(log)
         db.session.commit()
-        
-        flash(f"Successo! Prodotti {oil}L di EVO in {process_time} min.", "success")
-    
-    else:
-        # Gestione degli errori 
-        if not res:
-            flash("Non ci sono abbastanza olive acquistate!", "danger")
-        if not afford:
-            flash("Non ci sono abbastanza soldi per la produzione EVO!", "danger")
-            
+        flash(f"Successo! Prodotti {oil}L di EVO e {sansa}kg di Sansa", "success")
     return redirect(url_for('status'))
 
 @app.route('/sell_product', methods=['POST'])
@@ -271,6 +246,49 @@ def sell_product():
         flash(f"Venduti {amount} unità di {product} per {revenue:.2f}€!", "success")
     else:
         flash(f"Quantità insufficiente di {product}!", "danger")
+        
+    return redirect(url_for('status'))
+
+@app.route('/sell')
+@login_required
+def sell():
+    s = Stock.query.first()
+    total_revenue = 0
+    
+    # 1. Считаем и обнуляем разливное масло
+    revenue_virgin = s.oil_virgin * PRICE_VIRGIN
+    revenue_evo = s.oil_extra * PRICE_EVO
+    revenue_sansa = s.sansa * PRICE_SANSA
+    
+    # 2. Считаем и обнуляем БУТЫЛКИ (пусть они будут на 20% дороже)
+    revenue_bottled_v = s.bottled_virgin * (PRICE_VIRGIN * 1.2)
+    revenue_bottled_e = s.bottled_extra * (PRICE_EVO * 1.2)
+    
+    total_revenue = revenue_virgin + revenue_evo + revenue_sansa + revenue_bottled_v + revenue_bottled_e
+    
+    if total_revenue > 0:
+        s.money += total_revenue
+        
+        # Обнуляем склады
+        s.oil_virgin = 0
+        s.oil_extra = 0
+        s.sansa = 0
+        s.bottled_virgin = 0
+        s.bottled_extra = 0
+        
+        # Записываем в историю общую продажу
+        new_sale = SalesHistory(
+            date=datetime.now().strftime('%d.%m.%Y %H:%M'),
+            product_type="VENDITA TOTALE",
+            quantity=0, # Для общей продажи поставим 0 или сумму единиц
+            price_unit=0,
+            total_revenue=total_revenue
+        )
+        db.session.add(new_sale)
+        db.session.commit()
+        flash(f"Grande affare! Hai venduto tutto lo stock per {total_revenue:.2f}€!", "success")
+    else:
+        flash("Il magazzino è già vuoto!", "warning")
         
     return redirect(url_for('status'))
 
