@@ -1,3 +1,21 @@
+// Funzione per mostrare un avviso se la temperatura è alta
+function checkTemperature(temp) {
+    if (temp > 27.0) {
+        console.warn("Attenzione: Temperatura elevata (" + temp + "°C). Sistema in raffreddamento.");
+        
+    }
+}
+
+// Esempio: conferma prima di vendere tutto
+document.querySelectorAll('.btn-red').forEach(button => {
+    button.addEventListener('click', function(e) {
+        const confirmAction = confirm("Sei sicuro di voler vendere l'intero stock?");
+        if (!confirmAction) {
+            e.preventDefault();
+        }
+    });
+});
+
 window.addEventListener('load', function() {
     const savedScroll = localStorage.getItem('scrollPosition');
     if (savedScroll) {

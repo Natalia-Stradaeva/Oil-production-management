@@ -8,7 +8,8 @@ from utils.validators import (
     COST_BUY_OLIVES, COST_PRODUCTION_BATCH,
     PRICE_VIRGIN, PRICE_EVO, PRICE_SANSA,
     COST_BOTTLE, COST_CORK,              
-    TIME_SPREMITURA, TIME_FILTRAZIONE    
+    TIME_SPREMITURA, TIME_FILTRAZIONE,
+    COST_BAG, BAGS_PER_PACKAGE    
 )
 from flask_login import (LoginManager, UserMixin,
      login_user, login_required, 
@@ -57,9 +58,7 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
         user = User.query.filter_by(username=username).first()
-        
         
         if user and user.password == password:
             login_user(user)
@@ -130,7 +129,6 @@ def produce_virgin():
         s.total_time += process_time
         s.last_production = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
 
-        # ИСПРАВЛЕНО: Добавлен параметр sansa_produced
         new_event = HarvestHistory(
             date=datetime.now().strftime('%d.%m.%Y'),
             olive_type="Vergine (Propria)",
@@ -159,44 +157,58 @@ def produce_virgin():
 @app.route('/produce_evo')
 @login_required 
 def produce_evo():
+    """Produzione di olio Extra Vergine (EVO) da olive acquistate"""
     from models import ProductionLog, HarvestHistory 
     s = Stock.query.first()
+    p = Plantation.query.first() # Per accedere alla capacità del frantoio
     batch_size = 100
+    
+    # Verifichiamo se abbiamo abbastanza olive acquistate e soldi per il processo
     res = has_resources(s.olives_bought, batch_size) 
     afford = can_afford(s.money, COST_PRODUCTION_BATCH)
     
     if res and afford:
-        oil, sansa = calculate_yield("evo", batch_size)
-        process_time = TIME_SPREMITURA + TIME_FILTRAZIONE
+        # Calcolo della resa ("evo")
+        result = calculate_yield("evo", batch_size, p.extraction_capacity)
         
+        # Aggiornamento dello stock
         s.olives_bought -= batch_size
         s.money -= COST_PRODUCTION_BATCH
-        s.oil_extra += oil  
-        s.sansa += sansa
-        s.total_time += process_time
+        s.oil_extra += result['oil'] # Olio EVO
+        s.sansa += result['sansa']
+        s.total_time += result['time']
         s.last_production = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
 
-        # ИСПРАВЛЕНО: Добавлен параметр sansa_produced
+        # Registrazione dell'evento nella storia del raccolto
         new_event = HarvestHistory(
             date=datetime.now().strftime('%d.%m.%Y'),
-            olive_type="EVO (Purchased)",
+            olive_type="EVO (Acquistate)",
             quantity=batch_size,
-            oil_produced=oil,
-            sansa_produced=sansa
+            oil_produced=result['oil'],
+            sansa_produced=result['sansa']
         )
         
+        # Log dettagliato per la visualizzazione nei grafici (Temperatura e Perdite)
         log = ProductionLog(
             date=s.last_production,
-            operation="Spremitura + Filtrazione (EVO)",
+            operation="Estrazione a Freddo (EVO)",
             oil_type="EVO",
-            quantity=oil,
-            time_spent=process_time
+            quantity=result['oil'],
+            time_spent=result['time'],
+            temperature=result['temp'], # Parametro per il grafico della temperatura
+            waste_loss=result['waste']   # Scarti di produzione
         )
         
         db.session.add(new_event)
         db.session.add(log)
         db.session.commit()
-        flash(f"Successo! Prodotti {oil}L di EVO e {sansa}kg di Sansa", "success")
+        
+        # Messaggio di successo per l'utente
+        flash(f"Successo! Prodotti {result['oil']}L di EVO. Temp: {result['temp']}°C.", "success")
+    else:
+        if not res: flash("Olive acquistate insufficienti!", "danger")
+        if not afford: flash("Soldi insufficienti per la produzione!", "danger")
+        
     return redirect(url_for('status'))
 
 @app.route('/sell_product', methods=['POST'])
@@ -221,7 +233,7 @@ def sell_product():
         stock_attr = 'oil_extra'
     elif product == 'Sansa':
         price = PRICE_SANSA
-        stock_attr = 'sansa'
+        stock_attr = 'sansa_bags'
     else:
         flash("Prodotto non valido!", "danger")
         return redirect(url_for('status'))
@@ -367,6 +379,46 @@ def bottling(oil_type):
     else:
         flash("Mancano bottiglie o tappi!", "danger")
         
+    return redirect(url_for('status'))
+
+@app.route('/buy_bags')
+@login_required
+def buy_bags():
+    """Acquisto di sacchi per il confezionamento della sansa (500 pezzi)"""
+    s = Stock.query.first()
+    # Calcoliamo il costo totale del pacchetto
+    total_cost = BAGS_PER_PACKAGE * COST_BAG # 500 * 0.50 = 250 euro
+    
+    if can_afford(s.money, total_cost):
+        s.money -= total_cost
+        s.empty_bags += BAGS_PER_PACKAGE
+        db.session.commit()
+        flash(f"Acquistati {BAGS_PER_PACKAGE} sacchi per la sansa!", "success")
+    else:
+        flash("Fondi insufficienti per acquistare i sacchi!", "danger")
+    return redirect(url_for('status'))
+
+@app.route('/package_sansa')
+@login_required
+def package_sansa():
+    """Confezionamento della sansa in sacchi da 10kg"""
+    from services.oil_logic import calculate_sansa_packaging
+    s = Stock.query.first()
+    
+    if s.sansa < 10:
+        flash("Non c'è abbastanza sansa per riempire un sacco (min 10kg)!", "warning")
+        return redirect(url_for('status'))
+        
+    num_bags, rest = calculate_sansa_packaging(s.sansa, s.empty_bags)
+    
+    if num_bags > 0:
+        s.sansa = rest
+        s.empty_bags -= num_bags
+        s.sansa_bags += num_bags
+        db.session.commit()
+        flash(f"Confezionati {num_bags} sacchi di sansa!", "success")
+    else:
+        flash("Mancano i sacchi vuoti!", "danger")
     return redirect(url_for('status'))
 
 @app.route('/refill_money')

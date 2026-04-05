@@ -3,6 +3,7 @@
 {% block title %}Dashboard - Eccellenza Campana{% endblock %}
 
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <h1>Gestione Oleificio Natalia</h1>
 
     <div class="calendar-card">
@@ -34,7 +35,9 @@
         <a href="/produce_virgin" class="btn btn-green"> Spremitura Vergine (Propria)</a>
         <a href="/produce_evo" class="btn btn-dark-blue"> Produzione EVO (Mercato)</a>
         <a href="/buy_packaging" class="btn btn-blue"> Compra Kit Imballaggio (50L)</a>
-
+        <a href="/buy_bags" class="btn btn-orange" style="background-color: #a0522d;"> Compra Sacchi (250€)</a>
+        <a href="/package_sansa" class="btn btn-green" style="background-color: #6b8e23;"> Confeziona Sansa</a>
+        
         {% if current_user.role == 'admin' %}
             <a href="/sell" class="btn btn-red"> Vendi Tutto</a>
             <a href="/refill_money" class="btn btn-yellow"> Ottenere sussidio (5000€)</a>
@@ -114,18 +117,52 @@
             </form>
         </div>
 
-        <div class="inventory-card card-sansa">
-            <h3> Sansa</h3>
-            <p>In magazzino: <strong>{{ inventory.sansa }} kg</strong></p>
-            <form action="/sell_product" method="POST" class="sale-form">
+        <div class="inventory-card card-sansa" style="border-left: 5px solid #6b8e23;">
+            <h3> Sansa (Sottoprodotto)</h3>
+            <p>Massa sfusa: <strong>{{ inventory.sansa }} kg</strong></p>
+            <p>Sacchi vuoti: <strong>{{ inventory.empty_bags }} pz</strong></p>
+            <hr>
+            <p>Sacchi pronti (10kg): <strong>{{ inventory.sansa_bags }} unità</strong></p>
+    
+             <form action="/sell_product" method="POST" class="sale-form">
                 <input type="hidden" name="product_type" value="Sansa">
-                <input type="number" name="amount" step="5" min="5" max="{{ inventory.sansa }}" placeholder="kg" required class="input-sell">
-                <button type="submit" class="btn btn-green">Vendi</button>
+                <input type="number" name="amount" step="1" max="{{ inventory.sansa_bags }}" placeholder="N. Sacchi" required class="input-sell">
+                <button type="submit" class="btn btn-green">Vendi Sacchi</button>
             </form>
         </div>
+     </div>
+
+        <div class="charts-section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 40px 0;">
+        <div class="chart-container" style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <h4 style="text-align: center;">Distribuzione Prodotti (L/kg)</h4>
+            <canvas id="productChart"></canvas>
+        </div>
+        <div class="chart-container" style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <h4 style="text-align: center;">Andamento Temperature (°C)</h4>
+            <canvas id="tempChart"></canvas>
+        </div>
+    </div>
+    
+   <div class="finance-summary" style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
+    
+    <div class="card-mini" style="flex: 1; min-width: 280px; background: #fff; border-left: 5px solid #27ae60; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <span style="color: #7f8c8d; font-size: 0.85em; text-transform: uppercase;"> Margine Virgin (Eco-Friendly)</span>
+        <h3 style="margin: 5px 0; color: #27ae60;">
+            {# Прибыль выше, т.к. жмых покрывает часть расходов #}
+            ~ 19.50 € / L
+        </h3>
+        <small style="color: #155724;">Recupero costi tramite vendita Sansa (+12€/batch)</small>
     </div>
 
-    
+    <div class="card-mini" style="flex: 1; min-width: 280px; background: #fff; border-left: 5px solid #2980b9; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <span style="color: #7f8c8d; font-size: 0.85em; text-transform: uppercase;"> Margine EVO (Mercato)</span>
+        <h3 style="margin: 5px 0; color: #2980b9;">
+            ~ 12.90 € / L
+        </h3>
+        <small style="color: #2980b9;">Sansa abbatte il costo delle olive acquistate</small>
+    </div>
+
+</div>
 
     {# Tabella della cronologia #}
     <h3>Cronologia della produzione</h3>
@@ -186,27 +223,80 @@
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
-<h3 style="margin-top: 40px;"> Log di Produzione (Dettagli Tecnici)</h3>
-<table>
-    <thead>
-        <tr>
-            <th>Data</th>
-            <th>Operazione</th>
-            <th>Tipo Olio</th>
-            <th>Quantità (L)</th>
-            <th>Tempo (min)</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for log in production_logs|reverse %} <tr>
-            <td>{{ log.date }}</td>
-            <td>{{ log.operation }}</td>
-            <td>{{ log.oil_type }}</td>
-            <td>{{ log.quantity }}</td>
-            <td>{{ log.time_spent }} min</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<h3 style="margin-top: 40px;"> Registro Tecnico di Produzione</h3>
+<div style="overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 50px;">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead style="background-color: #f2f2f2;">
+            <tr>
+                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Data / Ora</th>
+                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Operazione</th>
+                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Olio</th>
+                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Quantità</th>
+                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Temp (°C)</th>
+                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Tempo</th>
+                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Scarto (L)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in production_logs|reverse %}
+            <tr style="text-align: center; border-bottom: 1px solid #eee;">
+                <td style="padding: 10px;">{{ log.date }}</td>
+                <td style="padding: 10px;"><strong>{{ log.operation }}</strong></td>
+                <td style="padding: 10px;">{{ log.oil_type }}</td>
+                <td style="padding: 10px;">{{ log.quantity }} L</td>
+                <td style="padding: 10px;">
+                    <span style="padding: 4px 8px; border-radius: 4px; font-weight: bold; 
+                          background: {% if log.temperature > 27 %}#f8d7da; color: #721c24{% else %}#d4edda; color: #155724{% endif %};">
+                        {{ log.temperature }}°C
+                    </span>
+                </td>
+                <td style="padding: 10px;">{{ log.time_spent }} min</td>
+                <td style="padding: 10px; color: #6c757d;">{{ log.waste_loss }} L</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Grafico di distribuzione prodotto (Pie Chart)
+        const ctxPie = document.getElementById('productChart').getContext('2d');
+        new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: ['Virgin', 'EVO', 'Sansa (kg)'],
+                datasets: [{
+                    data: [{{ inventory.oil_virgin }}, {{ inventory.oil_extra }}, {{ inventory.sansa }}],
+                    backgroundColor: ['#27ae60', '#2980b9', '#a0522d']
+                }]
+            },
+            options: { responsive: true }
+        });
+
+        // Grafico della temperatura (Line Chart)
+        const tempLabels = [{% for log in production_logs[-10:] %} "{{ log.date.split(' ')[1] }}", {% endfor %}];
+        const tempData = [{% for log in production_logs[-10:] %} {{ log.temperature }}, {% endfor %}];
+
+        const ctxLine = document.getElementById('tempChart').getContext('2d');
+        new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: tempLabels,
+                datasets: [{
+                    label: 'Temperatura di estrazione (°C)',
+                    data: tempData,
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                scales: { y: { min: 20, max: 35 } },
+                responsive: true
+            }
+        });
+    });
+</script>
 {% endblock %}

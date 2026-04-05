@@ -12,6 +12,11 @@ PRICE_EVO_BOTTLED = 20.0
 TIME_SPREMITURA = 120
 TIME_FILTRAZIONE = 60
 TIME_IMBOTTIGLIAMENTO_UNIT = 2 # 2 minuti per 1 bottiglia
+COST_BAG = 0.50             # prezzo per sacco vuoto da 10 kg per sansa
+BAGS_PER_PACKAGE = 500      # prezzo per confezione di 500 sacchi vuoti
+MAX_TEMP_COLD_PRESS = 27.0  # limite di temperatura per la spremitura a freddo
+WASTE_COEFFICIENT = 0.02    # perdite durante la produzione (2%)
+SANSA_BAG_CAPACITY = 10     # 10 kg di sansa per sacco
 
 def can_afford(current_money, cost):
     """Controlla se ci sono abbastanza soldi per l'operazione"""
