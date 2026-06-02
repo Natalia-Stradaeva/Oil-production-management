@@ -3,6 +3,14 @@
     <head>
         <title>Accedere al sistema di controllo</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+   <style>
+            body {
+                background-image: url('/static/images/background.jpg') !important;
+                background-size: cover !important;
+                background-position: center !important;
+                background-attachment: fixed !important;
+            }
+        </style>
     </head>
     <body>
         <div class="login-container">
@@ -15,13 +23,15 @@
                 {% endif %}
             {% endwith %}
             <form method="POST">
-                <input type="text" name="username" placeholder="Nome utente" required>
-                <input type="password" name="password" placeholder="Password" required>
+                <input type="text" name="username" placeholder="Nome utente" required 
+                       style="width: 15%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em; box-sizing: border-box;">
+                <input type="password" name="password" placeholder="Password" required 
+                       style="width: 15%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 1em; box-sizing: border-box;">
                 <button type="submit" class="btn">Accedi</button>
             </form>
             <div style="margin-top: 20px;
-                        font-size: 0.8em; color: #666;
-                        border-top: 1px solid #eee;
+                        font-size: 1.6em; color: #ffffff; 
+                        text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
                         padding-top: 10px;">
                 Sistema di Gestione Oleificio - v1.0.2<br>
                 Accesso riservato al personale autorizzato

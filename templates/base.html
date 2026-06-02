@@ -5,14 +5,21 @@
     <meta charset="UTF-8">
     <title>{% block title %}Oleificio Natasha{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+    </style>
 </head>
 <body style="background-color: #f1f3eb;">
     <header style="display: flex;
                    justify-content: space-between;
                    align-items: center;
                    background: #f8f9fa;
-                   padding: 10px 20px;
-                   border-bottom: 1px solid #ddd;">
+                   padding: 10px 20px;">
+                 
         <div>
             <span>Utente: <strong>{{ current_user.username }}</strong></span>
             <span style="margin-left: 10px;

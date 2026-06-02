@@ -9,7 +9,7 @@ from utils.validators import (
     PRICE_VIRGIN, PRICE_EVO, PRICE_SANSA,
     COST_BOTTLE, COST_CORK,              
     TIME_SPREMITURA, TIME_FILTRAZIONE,
-    COST_BAG, BAGS_PER_PACKAGE    
+    COST_BAG, BAGS_PER_PACKAGE, PRODUCTION_CAPACITY, batch_size     
 )
 from flask_login import (LoginManager, UserMixin,
      login_user, login_required, 
@@ -119,15 +119,20 @@ def produce_virgin():
     afford = can_afford(s.money, COST_PRODUCTION_BATCH)
     
     if res and afford:
-        oil, sansa = calculate_yield("premium", batch_size)
-        process_time = TIME_SPREMITURA + TIME_FILTRAZIONE
+        # Вызываем функцию с тремя аргументами (добавили PRODUCTION_CAPACITY)
+        # И теперь получаем словарь 'risultati'
+        risultati = calculate_yield("premium", batch_size, PRODUCTION_CAPACITY)
+        
+        # Достаем данные из словаря
+        oil = risultati["oil"]
+        sansa = risultati["sansa"]
+        process_time = risultati["time"] # Время теперь берем из расчетов
         
         s.olives_own -= batch_size
         s.money -= COST_PRODUCTION_BATCH
         s.oil_virgin += oil
         s.sansa += sansa
         s.total_time += process_time
-        s.last_production = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
 
         new_event = HarvestHistory(
             date=datetime.now().strftime('%d.%m.%Y'),

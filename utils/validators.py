@@ -9,6 +9,9 @@ COST_CORK = 0.20    # Costo per tappo di bottiglia
 PRICE_VIRGIN_BOTTLED = 30.0 
 PRICE_EVO_BOTTLED = 20.0
 # Tempo di elaborazione (in minuti)
+PRODUCTION_CAPACITY = 200.0  # кг/час
+batch_size = 100.0  # kg per batch di produzione
+
 TIME_SPREMITURA = 120
 TIME_FILTRAZIONE = 60
 TIME_IMBOTTIGLIAMENTO_UNIT = 2 # 2 minuti per 1 bottiglia
