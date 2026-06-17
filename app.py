@@ -8,8 +8,7 @@ from utils.validators import (
     COST_BUY_OLIVES, COST_PRODUCTION_BATCH,
     PRICE_VIRGIN, PRICE_EVO, PRICE_SANSA,
     COST_BOTTLE, COST_CORK,              
-    TIME_SPREMITURA, TIME_FILTRAZIONE,
-    COST_BAG, BAGS_PER_PACKAGE, PRODUCTION_CAPACITY, batch_size     
+    COST_BAG, BAGS_PER_PACKAGE, PRODUCTION_CAPACITY, BATCH_SIZE, PACKAGING_BATCH_SIZE,     
 )
 from flask_login import (LoginManager, UserMixin,
      login_user, login_required, 
@@ -114,21 +113,20 @@ def buy():
 def produce_virgin():
     from models import ProductionLog, HarvestHistory 
     s = Stock.query.first()
-    batch_size = 100
-    res = has_resources(s.olives_own, batch_size) 
+    res = has_resources(s.olives_own, BATCH_SIZE) 
     afford = can_afford(s.money, COST_PRODUCTION_BATCH)
     
     if res and afford:
         # Вызываем функцию с тремя аргументами (добавили PRODUCTION_CAPACITY)
         # И теперь получаем словарь 'risultati'
-        risultati = calculate_yield("premium", batch_size, PRODUCTION_CAPACITY)
+        risultati = calculate_yield("premium",BATCH_SIZE, PRODUCTION_CAPACITY)
         
         # Достаем данные из словаря
         oil = risultati["oil"]
         sansa = risultati["sansa"]
         process_time = risultati["time"] # Время теперь берем из расчетов
         
-        s.olives_own -= batch_size
+        s.olives_own -= BATCH_SIZE
         s.money -= COST_PRODUCTION_BATCH
         s.oil_virgin += oil
         s.sansa += sansa
@@ -137,9 +135,9 @@ def produce_virgin():
         new_event = HarvestHistory(
             date=datetime.now().strftime('%d.%m.%Y'),
             olive_type="Vergine (Propria)",
-            quantity=batch_size,
-            oil_produced=oil,
-            sansa_produced=sansa 
+            quantity = BATCH_SIZE,
+            oil_produced = oil,
+            sansa_produced = sansa 
         )
         
         log = ProductionLog(
@@ -166,18 +164,16 @@ def produce_evo():
     from models import ProductionLog, HarvestHistory 
     s = Stock.query.first()
     p = Plantation.query.first() # Per accedere alla capacità del frantoio
-    batch_size = 100
-    
     # Verifichiamo se abbiamo abbastanza olive acquistate e soldi per il processo
-    res = has_resources(s.olives_bought, batch_size) 
+    res = has_resources(s.olives_bought, BATCH_SIZE) 
     afford = can_afford(s.money, COST_PRODUCTION_BATCH)
     
     if res and afford:
         # Calcolo della resa ("evo")
-        result = calculate_yield("evo", batch_size, p.extraction_capacity)
+        result = calculate_yield("evo", BATCH_SIZE, p.extraction_capacity)
         
-        # Aggiornamento dello stock
-        s.olives_bought -= batch_size
+        # Aggiornamento dello s
+        s.olives_bought -= BATCH_SIZE
         s.money -= COST_PRODUCTION_BATCH
         s.oil_extra += result['oil'] # Olio EVO
         s.sansa += result['sansa']
@@ -188,7 +184,7 @@ def produce_evo():
         new_event = HarvestHistory(
             date=datetime.now().strftime('%d.%m.%Y'),
             olive_type="EVO (Acquistate)",
-            quantity=batch_size,
+            quantity=BATCH_SIZE,
             oil_produced=result['oil'],
             sansa_produced=result['sansa']
         )
@@ -339,15 +335,15 @@ def next_month():
 @login_required
 def buy_packaging():
     s = Stock.query.first()
-    batch_size = 50 # Acquistiamo in confezioni da 50 pezzi.
-    total_cost = batch_size * (COST_BOTTLE + COST_CORK) # 50 euro
+    
+    total_cost = PACKAGING_BATCH_SIZE * (COST_BOTTLE + COST_CORK) # 50 euro
     
     if can_afford(s.money, total_cost):
         s.money -= total_cost
-        s.bottles += batch_size
-        s.corks += batch_size
+        s.bottles += PACKAGING_BATCH_SIZE
+        s.corks += PACKAGING_BATCH_SIZE 
         db.session.commit()
-        flash(f"Acquistati {batch_size} kit di imballaggio (1.00€/cad)!", "success")
+        flash(f"Acquistati {PACKAGING_BATCH_SIZE} kit di imballaggio (1.00€/cad)!", "success")
     else:
         flash("Non hai abbastanza soldi per l'imballaggio!", "danger")
     return redirect(url_for('status'))

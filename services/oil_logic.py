@@ -1,3 +1,10 @@
+from utils.validators import (
+    OIL_YIELD_PREMIUM, OIL_YIELD_EVO, 
+    SANSA_YIELD_PREMIUM, SANSA_YIELD_EVO,
+    WASTE_COEFFICIENT, MAX_TEMP_COLD_PRESS,
+    TIME_COOLING, TIME_FILTRATION 
+)
+
 import random
 
 def get_weather_impact():
@@ -48,17 +55,17 @@ def calculate_yield(olive_type: str, quantity: float, capacity_per_hour: float) 
     
     # Calcolo base della resa 
     if olive_type == "premium":
-        oil_yield_factor = 0.18 # Oliva da plantazione propria ha resa leggermente superiore
-        sansa_yield_factor = 0.40
+        oil_yield_factor = OIL_YIELD_PREMIUM # Oliva da plantazione propria ha resa leggermente superiore
+        sansa_yield_factor =SANSA_YIELD_PREMIUM
     else:
-        oil_yield_factor = 0.15 # Oliva da olio EVO ha resa leggermente inferiore
-        sansa_yield_factor = 0.45
+        oil_yield_factor = OIL_YIELD_EVO # Oliva da olio EVO ha resa leggermente inferiore
+        sansa_yield_factor = SANSA_YIELD_EVO
         
     raw_oil = quantity * oil_yield_factor
     sansa = quantity * sansa_yield_factor
     
     # Perdite di produzione (Scrap 2%) 
-    waste = raw_oil * 0.02
+    waste = raw_oil * WASTE_COEFFICIENT
     final_oil = round(raw_oil - waste, 2)
     
     # Calcolo del tempo basato sulla potenza (Capacity = Weight / Time)
@@ -68,11 +75,9 @@ def calculate_yield(olive_type: str, quantity: float, capacity_per_hour: float) 
     # Simulazione Temperatura e Surriscaldamento
     # Se temp > 27°C, aggiungiamo tempo di raffreddamento
     current_temp = round(random.uniform(22.0, 30.0), 1)
-    cooling_time = 0
-    if current_temp > 27.0:
-        cooling_time = 30 # 30 minuti di pausa per raffreddare
+    cooling_time = TIME_COOLING if current_temp > MAX_TEMP_COLD_PRESS else 0
         
-    total_time = base_time + cooling_time + 60 # +60 min per filtrazione fissa
+    total_time = base_time + cooling_time + TIME_FILTRATION
     
     return {
         "oil": final_oil,

@@ -3,7 +3,7 @@
 {% block title %}Dashboard - Eccellenza Campana{% endblock %}
 
 {% block content %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <h1>Gestione Oleificio Natalia</h1>
 
     <div class="calendar-card">
@@ -30,7 +30,7 @@
         {% endif %}
     {% endwith %}
 
-    <div class="actions-container">
+    <div class="actions-container">с
         <a href="/buy" class="btn btn-orange"> Acquista Olive (105€)</a>
         <a href="/produce_virgin" class="btn btn-green"> Spremitura Vergine (Propria)</a>
         <a href="/produce_evo" class="btn btn-dark-blue"> Produzione EVO (Mercato)</a>
@@ -135,11 +135,11 @@
         <div class="charts-section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 40px 0;">
         <div class="chart-container" style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
             <h4 style="text-align: center;">Distribuzione Prodotti (L/kg)</h4>
-            <canvas id="productChart"></canvas>
+            <canvas id="productChart" style="visibility: hidden;"></canvas>
         </div>
         <div class="chart-container" style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
             <h4 style="text-align: center;">Andamento Temperature (°C)</h4>
-            <canvas id="tempChart"></canvas>
+            <canvas id="tempChart" style="visibility: hidden;"></canvas>
         </div>
     </div>
     
@@ -297,6 +297,8 @@
                 responsive: true
             }
         });
+        document.getElementById('productChart').style.visibility = 'visible';
+        document.getElementById('tempChart').style.visibility = 'visible';
     });
 </script>
 {% endblock %}

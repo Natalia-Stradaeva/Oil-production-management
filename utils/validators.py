@@ -10,8 +10,8 @@ PRICE_VIRGIN_BOTTLED = 30.0
 PRICE_EVO_BOTTLED = 20.0
 # Tempo di elaborazione (in minuti)
 PRODUCTION_CAPACITY = 200.0  # кг/час
-batch_size = 100.0  # kg per batch di produzione
-
+BATCH_SIZE = 100.0  # kg per batch di produzione
+PACKAGING_BATCH_SIZE = 50 # комплект для 50 бутылок (50 литров масла)
 TIME_SPREMITURA = 120
 TIME_FILTRAZIONE = 60
 TIME_IMBOTTIGLIAMENTO_UNIT = 2 # 2 minuti per 1 bottiglia
@@ -20,6 +20,21 @@ BAGS_PER_PACKAGE = 500      # prezzo per confezione di 500 sacchi vuoti
 MAX_TEMP_COLD_PRESS = 27.0  # limite di temperatura per la spremitura a freddo
 WASTE_COEFFICIENT = 0.02    # perdite durante la produzione (2%)
 SANSA_BAG_CAPACITY = 10     # 10 kg di sansa per sacco
+
+ESTIMATED_HARVEST_Q = 15.0      # Средний урожай в квинталях
+DEFAULT_YIELD_LITERS = 18.0     # Средний выход масла в литрах с партии
+SANSA_KG_PER_BATCH = 80.0       # Средний выход жмыха в кг
+
+# Базовые коэффициенты для планирования
+OIL_YIELD_PREMIUM = 0.18  # Сколько литров масла с 1 кг оливок
+OIL_YIELD_EVO = 0.15     # Сколько литров масла с 1 кг оливок для EVO
+
+# Коэффициенты выхода жмыха (Sansa)
+SANSA_YIELD_PREMIUM = 0.40
+SANSA_YIELD_EVO = 0.45
+
+TIME_COOLING = 30      # Мин. на охлаждение
+TIME_FILTRATION = 60   # Мин. на фильтрацию
 
 def can_afford(current_money, cost):
     """Controlla se ci sono abbastanza soldi per l'operazione"""

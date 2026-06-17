@@ -16,17 +16,6 @@ document.querySelectorAll('.btn-red').forEach(button => {
     });
 });
 
-window.addEventListener('load', function() {
-    const savedScroll = localStorage.getItem('scrollPosition');
-    if (savedScroll) {
-        window.scrollTo(0, parseInt(savedScroll));
-        localStorage.removeItem('scrollPosition');
-    }
-});
-
-window.addEventListener('beforeunload', function() {
-    localStorage.setItem('scrollPosition', window.scrollY);
-});
 
 document.addEventListener('submit', function() {
     
@@ -37,8 +26,24 @@ document.addEventListener('submit', function() {
     }
 });
 
-
+// Скрытие уведомлений через 3 секунды
 setTimeout(() => {
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(a => a.style.display = 'none');
 }, 3000);
+
+// --- ЭТОТ БЛОК ОТВЕЧАЕТ ЗА СОХРАНЕНИЕ ПОЗИЦИИ ПРОКРУТКИ ---
+window.addEventListener('beforeunload', function() {
+    localStorage.setItem('scrollPosition', window.scrollY);
+});
+
+window.addEventListener('load', function() {
+    const savedScroll = localStorage.getItem('scrollPosition');
+    if (savedScroll) {
+        window.scrollTo({
+            top: parseInt(savedScroll),
+            behavior: 'instant' 
+        });
+        localStorage.removeItem('scrollPosition');
+    }
+});
