@@ -4,7 +4,13 @@
 
 {% block content %}
 
-    <h1>Gestione Oleificio Natalia</h1>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 style="margin: 0;">Gestione Oleificio Natalia</h1>
+        
+        <div style="background: #27ae60; color: white; padding: 10px 20px; border-radius: 5px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            Saldo: <span id="val-money">{{ "%.2f"|format(inventory.money) }}</span> €
+        </div>
+    </div>
 
     <div class="calendar-card">
         <div>
@@ -30,44 +36,62 @@
         {% endif %}
     {% endwith %}
 
-    <div class="actions-container">с
-        <a href="/buy" class="btn btn-orange"> Acquista Olive (105€)</a>
-        <a href="/produce_virgin" class="btn btn-green"> Spremitura Vergine (Propria)</a>
-        <a href="/produce_evo" class="btn btn-dark-blue"> Produzione EVO (Mercato)</a>
-        <a href="/buy_packaging" class="btn btn-blue"> Compra Kit Imballaggio (50L)</a>
-        <a href="/buy_bags" class="btn btn-orange" style="background-color: #a0522d;"> Compra Sacchi (250€)</a>
-        <a href="/package_sansa" class="btn btn-green" style="background-color: #6b8e23;"> Confeziona Sansa</a>
-        
-        {% if current_user.role == 'admin' %}
-            <a href="/sell" class="btn btn-red"> Vendi Tutto</a>
-            <a href="/refill_money" class="btn btn-yellow"> Ottenere sussidio (5000€)</a>
-        {% endif %}
-    </div>
-    <div class="balance-banner">
-         <strong>Bilancio: {{ inventory.money }} €</strong>
-    </div>
+    <div class="actions-container">
+    <form action="/buy" method="POST" class="sale-form" style="display:inline;">
+        <button type="submit" class="btn btn-orange">Acquista Olive (105€)</button>
+    </form>
+    <form action="/produce_virgin" method="POST" class="sale-form" style="display:inline;">
+        <button type="submit" class="btn btn-green">Spremitura Vergine (Propria)</button>
+    </form>
+    <form action="/produce_evo" method="POST" class="sale-form" style="display:inline;">
+        <button type="submit" class="btn btn-dark-blue">Produzione EVO (Mercato)</button>
+    </form>
+    <form action="/buy_packaging" method="POST" class="sale-form" style="display:inline;">
+        <button type="submit" class="btn btn-blue">Compra Kit Imballaggio (50L)</button>
+    </form>
+    <form action="/buy_bags" method="POST" class="sale-form" style="display:inline;">
+        <button type="submit" class="btn btn-orange" style="background-color: #a0522d;">Compra Sacchi (250€)</button>
+    </form>
+    <form action="/package_sansa" method="POST" class="sale-form" style="display:inline;">
+        <button type="submit" class="btn btn-green" style="background-color: #6b8e23;">Confeziona Sansa</button>
+    </form>
+    
+    {% if current_user.role == 'admin' %}
+        <form action="/sell" method="POST" class="sale-form" style="display:inline;">
+            <button type="submit" class="btn btn-red">Vendi Tutto</button>
+        </form>
+        <form action="/refill_money" method="POST" class="sale-form" style="display:inline;">
+            <button type="submit" class="btn btn-yellow">Ottenere sussidio (5000€)</button>
+        </form>
+    {% endif %}
+    
+    <!-- Кнопка смены месяца -->
+    <form action="/next_month" method="POST" class="sale-form" style="display:inline;">
+        <button type="submit" class="btn btn-blue">⏭️ Passa al prossimo mese</button>
+    </form>
+</div>
     
     {# magazzino di olive #}
     <div class="raw-materials-banner">
         <div class="raw-item">
-            <span> <strong>Olive Proprie:</strong></span>
+            <span> <strong id="val-olives-own">Olive Proprie:</strong></span>
             <span class="raw-value">{{ inventory.olives_own }} kg</span>
         </div>
         <div class="divider-v"></div>
         <div class="raw-item">
-            <span> <strong>Olive Acquistate:</strong></span>
+            <span> <strong id="val-olives-bought">Olive Acquistate:</strong></span>
             <span class="raw-value">{{ inventory.olives_bought }} kg</span>
         </div>
     </div>
 
     <div class="raw-materials-banner" style="background: #e8f4f8; border-color: #3498db; margin-top: -15px;">
         <div class="raw-item">
-            <span> <strong>Bottiglie vuote:</strong></span>
+            <span> <strong id="val-bottles">Bottiglie vuote:</strong></span>
             <span class="raw-value">{{ inventory.bottles }} шт.</span>
         </div>
         <div class="divider-v" style="border-color: #3498db;"></div>
         <div class="raw-item">
-            <span> <strong>Tappi:</strong></span>
+            <span> <strong id="val-corks">Tappi:</strong></span>
             <span class="raw-value">{{ inventory.corks }} шт.</span>
         </div>
          <div class="divider-v" style="border-color: #3498db;"></div>
@@ -79,7 +103,7 @@
      <div class="inventory-grid">
         <div class="inventory-card card-virgin">
             <h3> Olio Virgin</h3>
-            <p>In magazzino (sfuso): <strong>{{ inventory.oil_virgin }} L</strong></p>
+            <p>In magazzino (sfuso): <strong id="val-virgin">{{ inventory.oil_virgin }} L</strong></p>
     
             <form action="/sell_product" method="POST" class="sale-form">
                 <input type="hidden" name="product_type" value="Virgin">
@@ -87,9 +111,10 @@
                 <button type="submit" class="btn btn-green">Vendi Olio</button>
             </form>
 
-            <hr> <p> Bottiglie pronte: <strong>{{ inventory.bottled_virgin }} unità</strong></p>
-            <a href="/bottling/virgin" class="btn btn-orange" style="font-size: 0.8em; width: 100%;"> Imbottiglia 1L</a>
-    
+            <hr> <p> Bottiglie pronte: <strong id="val-bottled-virgin">{{ inventory.bottled_virgin }} unità</strong></p>
+            <form action="/bottling/virgin" method="POST" class="sale-form">
+     <button type="submit" class="btn btn-orange" style="font-size: 0.8em; width: 100%; border: none; cursor: pointer;">Imbottiglia 1L</button>
+</form>
             <form action="/sell_product" method="POST" class="sale-form" style="margin-top: 10px;">
                 <input type="hidden" name="product_type" value="Virgin"> <input type="number" name="amount" step="1" max="{{ inventory.bottled_virgin }}" placeholder="N. Bottiglie" required class="input-sell">
                 <button type="submit" class="btn btn-dark-blue">Vendi Bottiglie</button>
@@ -98,18 +123,20 @@
 
         <div class="inventory-card card-evo">
             <h3> Olio EVO</h3>
-            <p>In magazzino (sfuso): <strong>{{ inventory.oil_extra }} L</strong></p>
+            <p>In magazzino (sfuso): <strong id="val-evo">{{ inventory.oil_extra }} L</strong></p>
             <form action="/sell_product" method="POST" class="sale-form">
                 <input type="hidden" name="product_type" value="EVO">
                 <input type="number" name="amount" step="1" max="{{ inventory.oil_extra }}" placeholder="Litri sfusi" required class="input-sell">
                 <button type="submit" class="btn btn-green">Vendi Olio</button>
             </form>
             <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #34495e;">
-            <p> Bottiglie da 1L pronte: <strong>{{ inventory.bottled_extra }} unità</strong></p>
-            <a href="/bottling/extra" class="btn btn-orange" style="font-size: 0.8em; width: 100%; margin-bottom: 10px; display: block; text-align: center;"> 
-                Imbottiglia 1L
-            </a>
-    
+            <p> Bottiglie da 1L pronte: <strong id="val-bottled-extra">{{ inventory.bottled_extra }} unità</strong></p>
+            <form action="/bottling/extra" method="POST" class="sale-form">
+                <button type="submit" class="btn btn-orange" style="font-size: 0.8em; width: 100%; margin-bottom: 10px; display: block; text-align: center;"> 
+                    Imbottiglia 1L
+                </button>
+            </form>
+
             <form action="/sell_product" method="POST" class="sale-form">
                 <input type="hidden" name="product_type" value="Bottled_EVO"> 
                 <input type="number" name="amount" step="1" max="{{ inventory.bottled_extra }}" placeholder="N. Bottiglie" required class="input-sell">
@@ -119,10 +146,10 @@
 
         <div class="inventory-card card-sansa" style="border-left: 5px solid #6b8e23;">
             <h3> Sansa (Sottoprodotto)</h3>
-            <p>Massa sfusa: <strong>{{ inventory.sansa }} kg</strong></p>
-            <p>Sacchi vuoti: <strong>{{ inventory.empty_bags }} pz</strong></p>
+            <p>Massa sfusa: <strong id="val-sansa">{{ inventory.sansa }} kg</strong></p>
+            <p>Sacchi vuoti: <strong id="val-empty-bags">{{ inventory.empty_bags }} pz</strong></p>
             <hr>
-            <p>Sacchi pronti (10kg): <strong>{{ inventory.sansa_bags }} unità</strong></p>
+            <p>Sacchi pronti (10kg): <strong id="val-sansa-bags">{{ inventory.sansa_bags }} unità</strong></p>
     
              <form action="/sell_product" method="POST" class="sale-form">
                 <input type="hidden" name="product_type" value="Sansa">
