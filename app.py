@@ -2,7 +2,7 @@ import random
 from flask import Flask, render_template, redirect, url_for, jsonify, flash, request
 from datetime import datetime
 from models import db, Stock, Plantation, HarvestHistory, User, SalesHistory, ProductionLog  
-from services.oil_logic import calculate_yield, get_random_harvest
+from services.oil_logic import calculate_yield, get_random_harvest, get_weather_impact, calculate_bottling
 from utils.validators import (
     can_afford, has_resources, 
     COST_BUY_OLIVES, COST_PRODUCTION_BATCH,
@@ -306,6 +306,46 @@ def sell():
         'message': f'Vendita totale conclusa: {total_revenue:.2f}€ incassati!'
     })
 
+@app.route('/sell_bottled', methods=['POST'])
+@login_required
+def sell_bottled():
+    product = request.form.get('product_type')
+    try:
+        amount = int(request.form.get('amount', 0))
+    except ValueError:
+        return jsonify({'status': 'error', 'message': 'Quantità non valida!'}), 400
+
+    s = Stock.query.first()
+    
+    # Логика расчета
+    if product == 'Virgin':
+        if s.bottled_virgin < amount:
+            return jsonify({'status': 'error', 'message': 'Quantità non disponibile!'}), 400
+        s.bottled_virgin -= amount
+        revenue = amount * (PRICE_VIRGIN * 1.2)
+    elif product == 'Bottled_EVO':
+        if s.bottled_extra < amount:
+            return jsonify({'status': 'error', 'message': 'Quantità non disponibile!'}), 400
+        s.bottled_extra -= amount
+        revenue = amount * (PRICE_EVO * 1.2)
+    else:
+        return jsonify({'status': 'error', 'message': 'Prodotto non riconosciuto!'}), 400
+
+    s.money += revenue
+    
+    # Добавляем запись в историю продаж
+    new_sale = SalesHistory(
+        date=datetime.now().strftime('%d.%m.%Y %H:%M'),
+        product_type=product,
+        quantity=amount,
+        price_unit=(PRICE_VIRGIN * 1.2 if product == 'Virgin' else PRICE_EVO * 1.2),
+        total_revenue=revenue
+    )
+    db.session.add(new_sale)
+    db.session.commit()
+    
+    return jsonify({'status': 'success', 'message': f'Vendita di {amount} bottiglie completata!'})
+
 @app.route('/next_month', methods=['POST'])
 @login_required
 def next_month():
@@ -338,12 +378,8 @@ def next_month():
     # Commit unico per garantire l'atomicità dell'operazione
     db.session.commit()
     
-    # Risposta in formato JSON
-    return jsonify({
-        'status': 'success', 
-        'message': message,
-        'new_month': p.current_month
-    })
+    flash(message, 'success') # Показываем пользователю сообщение, что случилось
+    return redirect(url_for('status')) # Перенаправляем обратно на дашборд
 
 # Acquisto di materiali di imballaggio (bottiglie e tappi) 
 @app.route('/buy_packaging', methods=['POST'])
@@ -480,6 +516,15 @@ def package_sansa():
         'status': 'success', 
         'message': f"Confezionati {num_bags} sacchi di sansa!"
     })
+
+def calculate_sansa_packaging(total_sansa, bags_available):
+    """
+    Рассчитывает упаковку сансы.
+    """
+    max_possible_by_sansa = total_sansa // 10
+    num_bags = min(max_possible_by_sansa, bags_available)
+    rest = total_sansa - (num_bags * 10)
+    return num_bags, rest
 
 @app.route('/refill_money', methods=['POST'])
 @login_required

@@ -29,7 +29,7 @@ document.addEventListener('submit', function(e) {
         })
         .then(response => response.json())
         .then(data => {
-            // ВОТ ТУТ МЕСТО ДЛЯ ТВОЕГО БЛОКА:
+            
             if (data.status === 'success') {
                 console.log(data.message);
                 updateDashboard(); // Обновляем цифры на дашборде
@@ -72,22 +72,32 @@ function updateDashboard() {
         .then(response => response.json())
         .then(data => {
             const inv = data.inventory;
+            const inputVirgin = document.getElementById('max-virgin');
+            if (inputVirgin) inputVirgin.max = inv.bottled_virgin;
+
+            const inputEvo = document.getElementById('max-evo');
+            if (inputEvo) inputEvo.max = inv.bottled_extra;
             
-            // Обновляем показатели
-            const elements = {
-                'val-money': `${inv.money.toFixed(2)}`,
-                'val-olives-own': `${inv.olives_own} kg`,
-                'val-olives-bought': `${inv.olives_bought} kg`,
-                'val-bottles': `${inv.bottles} шт.`,
-                'val-corks': `${inv.corks} шт.`,
-                'val-empty-bags': `${inv.empty_bags} pz`,
-                'val-virgin': `${inv.oil_virgin} L`,
-                'val-evo': `${inv.oil_extra} L`,
-                'val-sansa': `${inv.sansa} kg`,
-                'val-bottled-virgin': `${inv.bottled_virgin} unità`,
-                'val-bottled-extra': `${inv.bottled_extra} unità`,
-                'val-sansa-bags': `${inv.sansa_bags} unità`
-            };
+           const elements = {
+    'val-money': `${inv.money.toFixed(2)} €`,
+    'val-olives-own': `${inv.olives_own.toFixed(1)} kg`,
+    'val-olives-bought': `${inv.olives_bought.toFixed(1)} kg`,
+    
+    // Numeri interi (pezzi)
+    'val-bottles': `${Math.floor(inv.bottles)} шт.`,
+    'val-corks': `${Math.floor(inv.corks)} шт.`,
+    'val-empty-bags': `${Math.floor(inv.empty_bags)} pz`,
+    
+    // Arrotondamento al decimo  (olio e olive)
+    'val-virgin': `${inv.oil_virgin.toFixed(1)} L`,
+    'val-evo': `${inv.oil_extra.toFixed(1)} L`,
+    'val-sansa': `${inv.sansa.toFixed(1)} kg`,
+    
+    // Numeri interi (unità di misura predefinite)
+    'val-bottled-virgin': `${Math.floor(inv.bottled_virgin)} unità`,
+    'val-bottled-extra': `${Math.floor(inv.bottled_extra)} unità`,
+    'val-sansa-bags': `${Math.floor(inv.sansa_bags)} unità`
+};
 
             for (const [id, value] of Object.entries(elements)) {
                 const el = document.getElementById(id);
@@ -97,5 +107,26 @@ function updateDashboard() {
         .catch(error => console.error('Errore aggiornamento:', error));
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.input-sell').forEach(input => {
+        input.addEventListener('invalid', function() {
+            // Если значение <= 0
+            if (this.value <= 0) {
+                this.setCustomValidity("La quantità deve essere maggiore di 0!");
+            } 
+            // Если значение > чем доступно в `max`
+            else if (parseInt(this.value) > parseInt(this.max)) {
+                this.setCustomValidity("Quantità non disponibile in magazzino!");
+            }
+        });
+        
+        // Сбрасываем ошибку при изменении значения
+        input.addEventListener('input', function() {
+            this.setCustomValidity('');
+        });
+    });
+});
 // Запускаем обновление каждые 3 секунды
-setInterval(updateDashboard, 3000);
+setInterval(updateDashboard, 3000);  
+
+

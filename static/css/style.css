@@ -4,7 +4,7 @@ body {
     padding: 0;
     min-height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    /* Это наш новый быстрый фон для всех страниц */
+
     background: linear-gradient(135deg, #2c3e50 0%, #000000 100%);
     background-attachment: fixed;
 }
@@ -24,7 +24,7 @@ body {
 
 /* ---  TIPOGRAFIA --- */
 h1 { 
-    color: #556b2f; 
+    color: #9ee01b; 
     text-align: center; 
     font-size: 2.8em; 
     text-shadow: 2px 2px 4px rgba(255,255,255,0.9); 
