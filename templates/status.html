@@ -115,7 +115,7 @@
         </form>
         <form action="/sell_bottled" method="POST" class="sale-form">
             <input type="hidden" name="product_type" value="Virgin">
-            <input type="number" name="amount" step="1" max="{{ inventory.bottled_virgin }}" placeholder="N. Bottiglie" required class="input-sell">
+            <input type="number" name="amount" id="input-virgin-bottles" step="1" max="{{ inventory.bottled_virgin }}" placeholder="N. Bottiglie" required class="input-sell">
         <button type="submit" class="btn btn-dark-blue">Vendi Bottiglie</button>
         </form>
     </div>
@@ -127,7 +127,7 @@
         </p>
         <form action="/sell_product" method="POST" class="sale-form">
             <input type="hidden" name="product_type" value="EVO">
-            <input type="number" name="amount" step="0.1" max="{{ inventory.oil_extra }}" placeholder="Litri sfusi" required class="input-sell">
+            <input type="number" name="amount"  step="0.1" max="{{ inventory.oil_extra }}" placeholder="Litri sfusi" required class="input-sell">
             <button type="submit" class="btn btn-green">Vendi Olio</button>
         </form>
         <hr style="margin: 15px 0; border: 0; border-top: 1px solid #ccc;">
@@ -137,7 +137,7 @@
         </form>
         <form action="/sell_bottled" method="POST" class="sale-form">
             <input type="hidden" name="product_type" value="Bottled_EVO">
-            <input type="number" name="amount" step="1" max="{{ inventory.bottled_extra }}" placeholder="N. Bottiglie" required class="input-sell">
+            <input type="number" name="amount" id="input-evo-bottles" step="1" max="{{ inventory.bottled_extra }}" placeholder="N. Bottiglie" required class="input-sell">
             <button type="submit" class="btn btn-dark-blue">Vendi Bottiglie</button>
         </form>
     </div>
@@ -150,179 +150,77 @@
         <p>Sacchi pronti (10kg): <strong id="val-sansa-bags">{{ inventory.sansa_bags }} unità</strong></p>
         <form action="/sell_product" method="POST" class="sale-form">
             <input type="hidden" name="product_type" value="Sansa">
-            <input type="number" name="amount" step="1" max="{{ inventory.sansa_bags }}" placeholder="N. Sacchi" required class="input-sell">
+            <input type="number" name="amount" id="input-sansa-bags" step="1" max="{{ inventory.sansa_bags }}" placeholder="N. Sacchi" required class="input-sell">
             <button type="submit" class="btn btn-green">Vendi Sacchi</button>
         </form>
     </div>
 </div>
 
-        <div class="charts-section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 40px 0;">
-        <div class="chart-container" style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-            <h4 style="text-align: center;">Distribuzione Prodotti (L/kg)</h4>
-            <canvas id="productChart" style="visibility: hidden;"></canvas>
-        </div>
-        <div class="chart-container" style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-            <h4 style="text-align: center;">Andamento Temperature (°C)</h4>
-            <canvas id="tempChart" style="visibility: hidden;"></canvas>
-        </div>
+<div id="dashboard-pdf" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+    
+    <div class="chart-container">
+        <h4 style="font-size: 0.9em; text-align: center;">Distribuzione Prodotti</h4>
+        <canvas id="productChart"></canvas>
     </div>
     
-   <div class="finance-summary" style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
+    <div class="chart-container">
+        <h4 style="font-size: 0.9em; text-align: center;">Temperature (°C)</h4>
+        <canvas id="tempChart"></canvas>
+    </div>
     
-    <div class="card-mini" style="flex: 1; min-width: 280px; background: #fff; border-left: 5px solid #27ae60; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <span style="color: #7f8c8d; font-size: 0.85em; text-transform: uppercase;"> Margine Virgin (Eco-Friendly)</span>
-        <h3 style="margin: 5px 0; color: #27ae60;">
-            {# Прибыль выше, т.к. жмых покрывает часть расходов #}
-            ~ 19.50 € / L
-        </h3>
-        <small style="color: #155724;">Recupero costi tramite vendita Sansa (+12€/batch)</small>
+    <div class="chart-container">
+        <h4 style="font-size: 0.9em; text-align: center;">Revenue Trend</h4>
+        <canvas id="revenueChart"></canvas>
     </div>
 
-    <div class="card-mini" style="flex: 1; min-width: 280px; background: #fff; border-left: 5px solid #2980b9; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <span style="color: #7f8c8d; font-size: 0.85em; text-transform: uppercase;"> Margine EVO (Mercato)</span>
-        <h3 style="margin: 5px 0; color: #2980b9;">
-            ~ 12.90 € / L
-        </h3>
-        <small style="color: #2980b9;">Sansa abbatte il costo delle olive acquistate</small>
+    <div class="chart-container">
+        <h4 style="font-size: 0.9em; text-align: center;">Efficiency</h4>
+        <canvas id="efficiencyChart"></canvas>
     </div>
-
+    
+    <div class="chart-container" style="grid-column: span 2;">
+        <h4 style="font-size: 0.9em; text-align: center;">Inventory</h4>
+        <canvas id="inventoryChart"></canvas>
+    </div>
 </div>
 
-    {# Tabella della cronologia #}
-    <h3>Cronologia della produzione</h3>
-    <table>
+<button onclick="window.print()" class="btn btn-blue" style="margin-bottom: 40px;">Esporta Dashboard in PDF</button>
+<h3 style="margin-top: 40px;">Registro Vendite (Ultimi 20 Movimenti)</h3>
+<div style="overflow-x: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <table style="width: 100%; border-collapse: collapse; text-align: center;">
         <thead>
-            <tr>
-                <th>Data</th>
-                <th>Tipo di Oliva</th>
-                <th>Quantità (kg)</th>
-                <th>Olio (L)</th>
-                <th>Sansa (kg)</th> 
+            <tr style="border-bottom: 2px solid #ddd;">
+                <th style="padding: 12px; text-align: center;">Data</th>
+                <th style="padding: 12px; text-align: center;">Tipo</th>
+                <th style="padding: 12px; text-align: center;">Descrizione</th>
+                <th style="padding: 12px; text-align: center;">Valore/Risultato</th>
             </tr>
         </thead>
-        <tbody>
-            {% for event in history|reverse %}
-                <tr>
-                    <td>{{ event.date }}</td>
-                    <td>{{ event.olive_type }}</td>
-                    <td>{{ event.quantity }}</td>
-                    <td>{{ event.oil_produced }}</td>
-                    <td>{{ event.sansa_produced }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <h3 style="margin-top: 40px;"> Registro delle Vendite</h3>
-    <table class="sales-table">
-        <thead>
-            <tr>
-                <th>Data</th>
-                <th>Prodotto</th>
-                <th>Quantità</th>
-                <th>Prezzo Unitario</th>
-                <th>Ricavo Totale</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for sale in sales_history|reverse %}
-            <tr>
-                <td>{{ sale.date }}</td>
-                <td>
-                    {% if sale.product_type == 'Virgin' %} Virgin
-                    {% elif sale.product_type == 'EVO' %} EVO
-                    {% else %} Sansa {% endif %}
+        <tbody id="log-table-body">
+            {% for log in all_logs[:20] %}
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px;">{{ log.date }}</td>
+                <td style="padding: 12px;">
+                    <span class="badge" style="padding: 4px 8px; border-radius: 4px; font-size: 0.85em; 
+                        {% if log.type == 'Vendita' %}background: #d4edda; color: #155724;
+                        {% elif log.type == 'Produzione' %}background: #cce5ff; color: #004085;
+                        {% elif log.type == 'Acquisto' %}background: #fff3cd; color: #856404;
+                        {% elif log.type == 'Imbottigliamento' %}background: #e2e3e5; color: #383d41;
+                        {% else %}background: #f8d7da; color: #721c24;{% endif %}">
+                        {{ log.type }}
+                    </span>
                 </td>
-                <td>{{ sale.quantity }}</td>
-                <td>{{ sale.price_unit }} €</td>
-                <td style="color: #27ae60; font-weight: bold;">+ {{ sale.total_revenue }} €</td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="5">Vendite non ancora registrate.</td>
+                <td style="padding: 12px;">{{ log.desc }}</td>
+                <td style="padding: 12px; font-weight: bold;">
+                    {{ log.val }}
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
+   
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
-<h3 style="margin-top: 40px;"> Registro Tecnico di Produzione</h3>
-<div style="overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 50px;">
-    <table style="width: 100%; border-collapse: collapse;">
-        <thead style="background-color: #f2f2f2;">
-            <tr>
-                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Data / Ora</th>
-                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Operazione</th>
-                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Olio</th>
-                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Quantità</th>
-                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Temp (°C)</th>
-                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Tempo</th>
-                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Scarto (L)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for log in production_logs|reverse %}
-            <tr style="text-align: center; border-bottom: 1px solid #eee;">
-                <td style="padding: 10px;">{{ log.date }}</td>
-                <td style="padding: 10px;"><strong>{{ log.operation }}</strong></td>
-                <td style="padding: 10px;">{{ log.oil_type }}</td>
-                <td style="padding: 10px;">{{ log.quantity }} L</td>
-                <td style="padding: 10px;">
-                    <span style="padding: 4px 8px; border-radius: 4px; font-weight: bold; 
-                          background: {% if log.temperature > 27 %}#f8d7da; color: #721c24{% else %}#d4edda; color: #155724{% endif %};">
-                        {{ log.temperature }}°C
-                    </span>
-                </td>
-                <td style="padding: 10px;">{{ log.time_spent }} min</td>
-                <td style="padding: 10px; color: #6c757d;">{{ log.waste_loss }} L</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Grafico di distribuzione prodotto (Pie Chart)
-        const ctxPie = document.getElementById('productChart').getContext('2d');
-        new Chart(ctxPie, {
-            type: 'pie',
-            data: {
-                labels: ['Virgin', 'EVO', 'Sansa (kg)'],
-                datasets: [{
-                    data: [{{ inventory.oil_virgin }}, {{ inventory.oil_extra }}, {{ inventory.sansa }}],
-                    backgroundColor: ['#27ae60', '#2980b9', '#a0522d']
-                }]
-            },
-            options: { responsive: true }
-        });
-
-        // Grafico della temperatura (Line Chart)
-        const tempLabels = [{% for log in production_logs[-10:] %} "{{ log.date.split(' ')[1] }}", {% endfor %}];
-        const tempData = [{% for log in production_logs[-10:] %} {{ log.temperature }}, {% endfor %}];
-
-        const ctxLine = document.getElementById('tempChart').getContext('2d');
-        new Chart(ctxLine, {
-            type: 'line',
-            data: {
-                labels: tempLabels,
-                datasets: [{
-                    label: 'Temperatura di estrazione (°C)',
-                    data: tempData,
-                    borderColor: '#e74c3c',
-                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                    tension: 0.3,
-                    fill: true
-                }]
-            },
-            options: {
-                scales: { y: { min: 20, max: 35 } },
-                responsive: true
-            }
-        });
-        document.getElementById('productChart').style.visibility = 'visible';
-        document.getElementById('tempChart').style.visibility = 'visible';
-    });
-</script>
 {% endblock %}

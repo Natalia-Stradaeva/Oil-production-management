@@ -217,3 +217,20 @@ tr:hover { background-color: #f9f9f9; }
     overflow-x: auto;
     margin-bottom: 20px;
 }
+
+/* --- AGGIORNAMENTO GRAFICI (Fix layout) --- */
+.chart-container {
+    background: white; 
+    padding: 15px; 
+    border-radius: 8px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: relative;
+    /* Убираем flex, чтобы canvas не сжимался */
+    display: block; 
+}
+
+canvas {
+    width: 100% !important;
+    height: 200px !important; /* Фиксированная высота для всех графиков */
+    display: block;
+}

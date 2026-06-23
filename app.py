@@ -76,22 +76,52 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route('/status')
-@login_required # Solo utenti loggati possono vedere lo status
+@login_required 
 def status():
-    # Recuperiamo i dati da tutte le tabelle per la visualizzazione
     inventory = Stock.query.first()
     factory_land = Plantation.query.first()
-    history = HarvestHistory.query.all() # Elenco di tutti i passati raccolti
-    sales_history = SalesHistory.query.all() # Elenco di tutte le vendite
-    production_logs = ProductionLog.query.all() 
-    # Trasmettiamo tutto questo in HTML
+    production_logs = ProductionLog.query.all()
+    # Собираем все логи в один список для универсальной таблицы
+    # Каждая запись будет иметь тип, дату, описание и сумму
+    all_logs = []
+    
+    # Добавляем историю сбора
+    for h in HarvestHistory.query.all():
+        all_logs.append({
+            'date': h.date, 
+            'type': 'Produzione', 
+            'desc': h.olive_type, 
+            'val': f"{h.oil_produced} L" # Пишем L вместо €
+        })
+        
+    # Добавляем продажи
+    for s in SalesHistory.query.all():
+        all_logs.append({
+            'date': s.date, 
+            'type': 'Vendita', 
+            'desc': s.product_type, 
+            'val': f"{s.total_revenue:.2f} €" # Фиксируем формат для денег
+        })
+        
+    # Добавляем тех. логи
+    for p in ProductionLog.query.all():
+        # Определяем единицу измерения в зависимости от операции
+        unit = "pz" if "Sacchi" in p.operation or "Kit" in p.operation else "L"
+        all_logs.append({
+            'date': p.date.split(' ')[0], 
+            'type': 'Produzione', 
+            'desc': p.operation, 
+            'val': f"{p.quantity} {unit}"
+        })
+
+    # Сортируем: сначала самые новые (по дате)
+    all_logs = sorted(all_logs, key=lambda x: x['date'], reverse=True)[:20]
+
     return render_template('status.html', 
                            inventory=inventory, 
                            land=factory_land, 
-                           history=history,
-                           sales_history=sales_history,
+                           all_logs=all_logs,
                            production_logs=production_logs)
-
 
 @app.route('/buy', methods=['POST'])
 @login_required # Solo utenti loggati possono comprare
@@ -100,6 +130,12 @@ def buy():
     if can_afford(s.money, COST_BUY_OLIVES):
         s.money -= COST_BUY_OLIVES
         s.olives_bought += 100
+        new_log = ProductionLog(
+            date=datetime.now().strftime('%d.%m.%Y %H:%M:%S'),
+            operation="Acquisto Olive",
+            quantity=100
+        )
+        db.session.add(new_log)
         db.session.commit()
         return jsonify({'status': 'success', 'message': 'Acquistati 100 kg di olive!'})
     else:
@@ -400,6 +436,12 @@ def buy_packaging():
     s.bottles += PACKAGING_BATCH_SIZE
     s.corks += PACKAGING_BATCH_SIZE 
     
+    new_log = ProductionLog(
+        date=datetime.now().strftime('%d.%m.%Y %H:%M:%S'),
+        operation="Acquisto Kit Imballaggio",
+        quantity=PACKAGING_BATCH_SIZE
+    )
+    db.session.add(new_log)
     # Salvataggio persistente dei dati
     db.session.commit()
     
@@ -449,6 +491,12 @@ def bottling(oil_type):
     s.bottles -= num_bottles
     s.corks -= num_bottles
     
+    new_log = ProductionLog(
+        date=datetime.now().strftime('%d.%m.%Y %H:%M:%S'),
+        operation=f"Imbottigliamento {oil_type.capitalize()}",
+        quantity=num_bottles
+    )
+    db.session.add(new_log)
     # Persistenza nel database
     db.session.commit()
     
@@ -476,6 +524,12 @@ def buy_bags():
     s.money -= total_cost
     s.empty_bags += BAGS_PER_PACKAGE
     
+    new_log = ProductionLog(
+        date=datetime.now().strftime('%d.%m.%Y %H:%M:%S'),
+        operation="Acquisto Sacchi Sansa",
+        quantity=BAGS_PER_PACKAGE
+    )
+    db.session.add(new_log)
     # Persistenza dei dati
     db.session.commit()
     
@@ -507,7 +561,13 @@ def package_sansa():
     s.sansa = rest
     s.empty_bags -= num_bags
     s.sansa_bags += num_bags
-    
+
+    new_log = ProductionLog(
+        date=datetime.now().strftime('%d.%m.%Y %H:%M:%S'),
+        operation="Confezionamento Sansa",
+        quantity=num_bags
+    )
+    db.session.add(new_log)
     # Persistenza dei dati
     db.session.commit()
     
@@ -542,6 +602,12 @@ def refill_money():
     # Erogazione del sussidio
     s.money += 5000.0
     
+    new_log = ProductionLog(
+        date=datetime.now().strftime('%d.%m.%Y %H:%M:%S'),
+        operation="Sussidio Governativo",
+        quantity=5000
+    )
+    db.session.add(new_log)
     # Persistenza dell'operazione
     db.session.commit()
     
@@ -554,21 +620,26 @@ def refill_money():
 @app.route('/api/status_data', methods=['GET'])
 @login_required
 def get_status_data():
-    """
-    Endpoint API per la sincronizzazione del frontend.
-    Restituisce lo stato attuale del magazzino e i log recenti.
-    """
     inventory = Stock.query.first()
-    
-    # Controllo di integrità: se il database è vuoto, solleva un'eccezione
     if not inventory:
-        return jsonify({'status': 'error', 'message': 'Stato del magazzino non inizializzato'}), 500
+        return jsonify({'status': 'error'}), 500
 
-    # Recupero i log filtrati: limitare a 10 elementi è una buona pratica di performance
-    logs = ProductionLog.query.order_by(ProductionLog.id.desc()).limit(10).all()
+    # 1. Получаем продажи (для таблицы)
+    # Нам нужно то же самое, что ты делаешь в функции status(), чтобы данные совпадали
+    sales = SalesHistory.query.order_by(SalesHistory.id.desc()).limit(20).all()
+    sales_logs = [
+        {'date': s.date, 'type': 'Vendita', 'desc': s.product_type, 'val': f"{s.total_revenue:.2f} €"}
+        for s in sales
+    ]
     
-    # Serializzazione dei dati: conversione esplicita dei tipi per il JSON
-    data = {
+    # 2. Получаем температуру (для графиков)
+    temp_logs = ProductionLog.query.order_by(ProductionLog.id.desc()).limit(10).all()
+    temp_data = [
+        {'date': log.date.split(' ')[1] if ' ' in log.date else log.date, 'temperature': getattr(log, 'temperature', 0)}
+        for log in reversed(temp_logs)
+    ]
+    
+    return jsonify({
         'inventory': {
             'money': float(inventory.money),
             'olives_own': float(inventory.olives_own),
@@ -583,16 +654,9 @@ def get_status_data():
             'bottled_virgin': int(inventory.bottled_virgin),
             'sansa_bags': int(inventory.sansa_bags)
         },
-        'logs': [
-            {
-                'date': log.date.split(' ')[1] if ' ' in log.date else log.date, 
-                'temperature': getattr(log, 'temperature', 0) # Uso getattr per sicurezza
-            } 
-            for log in reversed(logs)
-        ]
-    }
-    
-    return jsonify(data)
+        'logs': sales_logs,    # Только продажи
+        'temp_data': temp_data # Только температура
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
