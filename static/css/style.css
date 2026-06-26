@@ -1,10 +1,19 @@
-/* --- IMPOSTAZIONI DI BASE (LAYOUT) --- */
+/*
+ * Oleificio Simulation - Stylesheet
+ * * NOTA: Questo file è stato creato in modo opzionale per migliorare 
+ * l'esperienza utente (UX) e rendere l'interfaccia di simulazione 
+ * più chiara, leggibile e intuitiva.
+ */
+
+/* =========================================================================
+   LAYOUT E IMPOSTAZIONI DI BASE
+   ========================================================================= */
+
 body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
     background: linear-gradient(135deg, #2c3e50 0%, #000000 100%);
     background-attachment: fixed;
 }
@@ -22,7 +31,10 @@ body {
     margin: 20px auto;
 }
 
-/* ---  TIPOGRAFIA --- */
+/* =========================================================================
+   TIPOGRAFIA
+   ========================================================================= */
+
 h1 { 
     color: #9ee01b; 
     text-align: center; 
@@ -40,7 +52,10 @@ h3 {
     margin-bottom: 15px;
 }
 
-/* ---  PULSANTI (UI/UX) --- */
+/* =========================================================================
+   COMPONENTI UI: PULSANTI E AZIONI
+   ========================================================================= */
+
 .btn {
     display: inline-block;
     padding: 10px 20px;
@@ -61,12 +76,14 @@ h3 {
 }
 
 /* Colori dei pulsanti */
-.btn-blue      { background-color: #3498db; color: white; }
-.btn-orange    { background-color: #e67e22; color: white; } /* Per il riempimento */
-.btn-green     { background-color: #27ae60; color: white; } /* Per la vendita sfuso */
-.btn-dark-blue { background-color: #2c3e50; color: white; } /* Per la vendita di bottiglie */
-.btn-red       { background-color: #c0392b; color: white; }
-.btn-yellow    { background-color: #f1c40f; color: #2c3e50; }
+.btn-blue      { background-color: #3498db; color: white; } 
+.btn-orange    { background-color: #e67e22; color: white; } 
+.btn-green     { background-color: #27ae60; color: white; } 
+.btn-dark-blue { background-color: #2c3e50; color: white; } 
+.btn-red       { background-color: #c0392b; color: white; } 
+.btn-yellow    { background-color: #f1c40f; color: #2c3e50; } 
+.btn-sansa     { background-color: #8b4513; color: white;}
+.btn-sansa:hover {background-color: #5d2e0a;}
 
 .actions-container {
     margin-bottom: 30px; 
@@ -76,7 +93,10 @@ h3 {
     flex-wrap: wrap;
 }
 
-/* --- CARDS DI MAGAZZINO (GRID) --- */
+/* =========================================================================
+   MAGAZZINO E SCHEDE (CARDS)
+   ========================================================================= */
+
 .inventory-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -101,7 +121,7 @@ h3 {
 .inventory-card p { margin: 6px 0; font-size: 0.95em; color: #555; }
 .inventory-card strong { color: #2c3e50; }
 
-/* Forme all'interno delle card */
+
 .sale-form {
     display: flex; 
     gap: 8px;
@@ -120,7 +140,10 @@ h3 {
 
 .input-sell:focus { border-color: #3498db; }
 
-/* ---  TABELLE E PANNELLI INFORMATIVI --- */
+/* =========================================================================
+   BANNER, TABELLE E INFORMATIVA
+   ========================================================================= */
+   
 .raw-materials-banner {
     background: #fff; 
     border: 1px solid #e67e22; 
@@ -155,7 +178,10 @@ th { background: #556b2f; color: white; padding: 12px; text-transform: uppercase
 td { border-bottom: 1px solid #eee; padding: 12px; text-align: center; }
 tr:hover { background-color: #f9f9f9; }
 
-/* ---  CALENDARIO E ALERTS --- */
+/* =========================================================================
+   CALENDARIO, ALERTS E GRAFICI
+   ========================================================================= */
+
 .calendar-card {
     background: white;
     padding: 15px 25px;
@@ -177,7 +203,6 @@ tr:hover { background-color: #f9f9f9; }
 .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
 .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-/* Stili per la sezione grafici (Сетка для графиков) */
 .charts-section {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -193,17 +218,6 @@ tr:hover { background-color: #f9f9f9; }
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
-/* Colore per i sacchi di sansa (Цвета для жмыха) */
-.btn-sansa {
-    background-color: #8b4513; /* Marrone sella */
-    color: white;
-}
-
-.btn-sansa:hover {
-    background-color: #5d2e0a;
-}
-
-/* Animazione per i badge di temperatura */
 .temp-badge {
     padding: 2px 8px;
     border-radius: 4px;
@@ -212,25 +226,22 @@ tr:hover { background-color: #f9f9f9; }
 .temp-high { background: #ffcccc; color: #c0392b; } /* se > 27 */
 .temp-low { background: #d4efdf; color: #27ae60; }  /* se < 27 */
 
-/* Fix per le tabelle lunghe */
 .table-responsive {
     overflow-x: auto;
     margin-bottom: 20px;
 }
 
-/* --- AGGIORNAMENTO GRAFICI (Fix layout) --- */
 .chart-container {
     background: white; 
     padding: 15px; 
     border-radius: 8px; 
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     position: relative;
-    /* Убираем flex, чтобы canvas не сжимался */
     display: block; 
 }
 
 canvas {
     width: 100% !important;
-    height: 200px !important; /* Фиксированная высота для всех графиков */
+    height: 200px !important; 
     display: block;
 }

@@ -1,9 +1,20 @@
+{# 
+   Dashboard Operativa
+   Interfaccia di presentazione per la simulazione del processo produttivo.
+   Visualizza in tempo reale i dati generati dal modello Python (Core del progetto)
+   e gestisce le interazioni dell'utente..
+   Eredita la struttura da 'base.html'.
+#}
+
 {% extends "base.html" %}
 
 {% block title %}Dashboard - Eccellenza Campana{% endblock %}
 
 {% block content %}
 
+    {# =========================================================================
+       HEADER DASHBOARD: Saldo e info generali
+       ========================================================================= #}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h1 style="margin: 0;">Gestione Oleificio Natalia</h1>
         
@@ -12,6 +23,7 @@
         </div>
     </div>
 
+    {# Gestione Calendario (Logica temporale del sistema) #}
     <div class="calendar-card">
     <div>
         <span style="font-size: 1.2em;">
@@ -28,7 +40,7 @@
     </form>
 </div>
 
-    {# Notifications #}
+    {# Area Notifiche (Feedback dinamico per l'utente) #}
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -38,6 +50,10 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
+
+    {# =========================================================================
+       AZIONI OPERATIVE (Input utente e interazione con logica Python)
+       ========================================================================= #}
 
     <div class="actions-container">
     <form action="/buy" method="POST" class="sale-form" style="display:inline;">
@@ -67,11 +83,12 @@
             <button type="submit" class="btn btn-yellow">Ottenere sussidio (5000€)</button>
         </form>
     {% endif %}
-    
-    
 </div>
     
-    {# Magazzino di materie prime #}
+    {# =========================================================================
+       VISUALIZZAZIONE DATI (Magazzino e Grafici)
+       ========================================================================= #}
+
 <div class="raw-materials-banner">
     <div class="raw-item">
         <span><strong>Olive Proprie:</strong></span>
@@ -96,7 +113,7 @@
 
 
 
-    {# magazzino di olio #}
+    {# Inventario prodotti finiti #}
     <div class="inventory-grid">
     <div class="inventory-card card-virgin">
         <h3>Olio Virgin</h3>
@@ -185,6 +202,11 @@
 </div>
 
 <button onclick="window.print()" class="btn btn-blue" style="margin-bottom: 40px;">Esporta Dashboard in PDF</button>
+
+{# =========================================================================
+       REGISTRO STORICO: Tabella dei log
+       ========================================================================= #}
+
 <h3 style="margin-top: 40px;">Registro Vendite (Ultimi 20 Movimenti)</h3>
 <div style="overflow-x: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
     <table style="width: 100%; border-collapse: collapse; text-align: center;">
@@ -220,7 +242,7 @@
     </table>
 </div>
    
-
+{# Collegamento allo script JS per la gestione AJAX #}
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
 {% endblock %}

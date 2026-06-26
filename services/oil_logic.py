@@ -1,3 +1,11 @@
+"""
+Oleificio Simulation - Oil Logic Module
+
+Modulo dedicato alla logica di trasformazione industriale delle olive:
+gestione dei rendimenti produttivi, tempi di processo, condizioni climatiche
+e operazioni di imbottigliamento/confezionamento.
+"""
+
 from utils.validators import (
     OIL_YIELD_PREMIUM, OIL_YIELD_EVO, 
     SANSA_YIELD_PREMIUM, SANSA_YIELD_EVO,
@@ -7,8 +15,19 @@ from utils.validators import (
 
 import random
 
+# =============================================================================
+# LOGICA AGRICOLA E RACCOLTA
+# =============================================================================
+
 def get_weather_impact():
-    """Condizioni meteorologiche imprevedibili per la raccolta delle olive"""
+    """
+    Simula l'impatto delle condizioni meteorologiche sul raccolto annuale.
+    UTILIZZA LA FUNZIONE RANDOM PER LA SELEZIONE CASUALE DEL METEO.
+    
+    Returns:
+        dict: Dizionario contenente il tipo di meteo, il fattore di impatto 
+              e un messaggio descrittivo per l'interfaccia utente.
+    """
     weather_types = [
         {"type": "Soleggiato", "impact": 1.2, "msg": "Bel tempo! Il raccolto è superiore alla media."},
         {"type": "Variabile", "impact": 1.0, "msg": "Raccolto normale."},
@@ -17,15 +36,35 @@ def get_weather_impact():
     ]
     return random.choice(weather_types)
 
+def get_random_harvest(hectares):
+    """
+    Stima il raccolto totale basato sull'estensione dei terreni.
+    UTILIZZA LA FUNZIONE RANDOM PER GENERARE LA RESA VARIABILE PER ETTARO.
+    
+    Args:
+        hectares (float): Numero di ettari coltivati.
+        
+    Returns:
+        float: Peso totale stimato del raccolto in kg.
+    """
+    yield_per_hectare = random.uniform(3000, 6000)
+    total_harvest = hectares * yield_per_hectare
+    return round(total_harvest, 2)
+
+# =============================================================================
+# LOGICA DI TRASFORMAZIONE (FRANTOIO)
+# =============================================================================
+
 def calculate_bottling(liters, bottles_available, corks_available):
     """
-    Imbottigliamento dell'olio in bottiglie da 1 litro.
-    1 litro di olio + 1 bottiglia + 1 tappo di sughero = 1 prodotto finito.
+    Determina quante bottiglie da 1 litro possono essere prodotte.
+    
+    Returns:
+        tuple: (Numero di bottiglie prodotte, litri di olio rimanenti).
     """
-    # Prendiamo un numero intero di litri
     max_by_oil = int(liters)
     
-    # Troviamo il limite basato sul risorsa più limitata
+    # Il vincolo è dato dalla risorsa scarsa (olio, bottiglie o tappi)
     can_bottle = min(max_by_oil, bottles_available, corks_available)
     
     # Residui oleosi dopo l'imbottigliamento
@@ -33,38 +72,33 @@ def calculate_bottling(liters, bottles_available, corks_available):
     
     return can_bottle, remaining_oil
 
-def get_random_harvest(hectares):
-    """
-    Calcola il raccolto annuale basato sugli ettari.
-    Resa media: 3000-6000 kg per ettaro.
-    """
-    yield_per_hectare = random.uniform(3000, 6000)
-    total_harvest = hectares * yield_per_hectare
-    return round(total_harvest, 2)
-
 
 def calculate_yield(olive_type: str, quantity: float, capacity_per_hour: float) -> dict:
     """
-    Calcola la resa dell'olio e della sansa con parametri accademici.
+    Calcola la resa industriale in olio e sansa, includendo tempi e temperatura.
     
-    :param olive_type: Tipo di oliva ("premium" o "evo")
-    :param quantity: Quantità di olive in kg
-    :param capacity_per_hour: Capacità del frantoio (kg/h)
-    :return: Dizionario con risultati della produzione
+    Args:
+        olive_type (str): "premium" (olive proprie) o "evo" (acquistate).
+        quantity (float): Quantità di olive in ingresso (kg).
+        capacity_per_hour (float): Capacità del macchinario (kg/h).
+        
+    Returns:
+        dict: Risultati della produzione (olio, sansa, tempi, temp. e scarti).
     """
     
-    # Calcolo base della resa 
+    # Selezione dei coefficienti di resa basati sulla qualità
     if olive_type == "premium":
         oil_yield_factor = OIL_YIELD_PREMIUM # Oliva da plantazione propria ha resa leggermente superiore
         sansa_yield_factor =SANSA_YIELD_PREMIUM
     else:
         oil_yield_factor = OIL_YIELD_EVO # Oliva da olio EVO ha resa leggermente inferiore
         sansa_yield_factor = SANSA_YIELD_EVO
-        
+
+    # Calcolo quantità grezze    
     raw_oil = quantity * oil_yield_factor
     sansa = quantity * sansa_yield_factor
     
-    # Perdite di produzione (Scrap 2%) 
+    # Calcolo scarti produttivi 
     waste = raw_oil * WASTE_COEFFICIENT
     final_oil = round(raw_oil - waste, 2)
     
@@ -89,7 +123,10 @@ def calculate_yield(olive_type: str, quantity: float, capacity_per_hour: float) 
 
 def calculate_sansa_packaging(sansa_kg: float, bags_available: int) -> tuple:
     """
-    Calcola il confezionamento della sansa in sacchi da 10kg.
+    Determina il numero di sacchi da 10kg ottenibili dalla sansa disponibile.
+    
+    Returns:
+        tuple: (Numero di sacchi prodotti, sansa residua in kg).
     """
     max_bags = int(sansa_kg // 10)
     actual_bags = min(max_bags, bags_available)

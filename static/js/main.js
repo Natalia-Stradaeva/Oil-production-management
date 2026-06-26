@@ -1,10 +1,19 @@
-// --- Вспомогательные функции ---
+/*
+ * Oleificio Simulation - Frontend Logic
+ * Gestione interazioni dinamiche, aggiornamento dashboard (AJAX) e grafici.
+ */
+
+// =============================================================================
+// UTILITIES E GESTIONE EVENTI BASE
+// =============================================================================
+
 function checkTemperature(temp) {
     if (temp > 27.0) {
         console.warn("Attenzione: Temperatura elevata (" + temp + "°C). Sistema in raffreddamento.");
     }
 }
 
+// Intercetta la vendita totale per conferma utente
 document.querySelectorAll('.btn-red').forEach(button => {
     button.addEventListener('click', function(e) {
         const confirmAction = confirm("Sei sicuro di voler vendere l'intero stock?");
@@ -12,10 +21,10 @@ document.querySelectorAll('.btn-red').forEach(button => {
     });
 });
 
+// Gestione invio form tramite AJAX (evita ricaricamento pagina)
 document.addEventListener('submit', function(e) {
     if (e.target.classList.contains('sale-form')) {
         e.preventDefault();
-        console.log("Кнопка нажата, отправляю запрос..."); // Отладка
         
         const form = e.target;
         const formData = new FormData(form);
@@ -23,23 +32,23 @@ document.addEventListener('submit', function(e) {
         fetch(form.action, { method: 'POST', body: formData })
             .then(response => response.json())
             .then(data => {
-                console.log("Ответ сервера:", data); // Посмотрим, что отвечает сервер
                 if (data.status === 'success') {
-                    console.log("Успех, обновляю страницу!");
                     updateDashboard(); 
                 } else {
-                    alert(data.message || "Ошибка!");
+                    alert(data.message || "Errore!");
                 }
             })
-            .catch(err => console.error("Ошибка сети:", err));
+            .catch(err => console.error("Errore di rete:", err));
     }
 });
 
+// Auto-hide alerts dopo 3 secondi
 setTimeout(() => {
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(a => a.style.display = 'none');
 }, 3000);
 
+// Gestione scroll della pagina
 window.addEventListener('beforeunload', () => localStorage.setItem('scrollPosition', window.scrollY));
 window.addEventListener('load', () => {
     const savedScroll = localStorage.getItem('scrollPosition');
@@ -49,11 +58,13 @@ window.addEventListener('load', () => {
     }
 });
 
-// --- Глобальные переменные ---
+// =============================================================================
+// DASHBOARD E AGGIORNAMENTO DATI
+// =============================================================================
+
 let productChart, tempChart, revenueChart, efficiencyChart, inventoryChart;
 let lastDataSnapshot = null;
 
-// --- Функции обновления ---
 function updateDashboard() {
     fetch('/api/status_data')
         .then(response => response.json())
@@ -90,23 +101,27 @@ function updateDashboard() {
         .catch(error => console.warn('Aggiornamento:', error));
 }
 
+// =============================================================================
+// LOGICA GRAFICI (CHART.JS)
+// =============================================================================
+
 function updateCharts(data) {
     const inv = data.inventory;
 
-    // 1. График продукции (Pie)
+    // 1. Grafico produzione (Pie chart)
     if (productChart && inv) {
         productChart.data.datasets[0].data = [inv.oil_virgin, inv.oil_extra, inv.sansa];
         productChart.update('none');
     }
 
-    // 2. ГРАФИК ТЕМПЕРАТУРЫ (Line)
+    // 2. Grafico temperatura (Line chart)
     if (tempChart && data.temp_data) {
         tempChart.data.labels = data.temp_data.map(l => l.date);
         tempChart.data.datasets[0].data = data.temp_data.map(l => l.temperature);
         tempChart.update('none'); 
     }
 
-    // 3. Revenue
+    // 3. Grafico ricavi/saldo (Line chart)
     if (revenueChart && inv) {
         if (revenueChart.data.datasets[0].data.length === 0 || 
             revenueChart.data.datasets[0].data[revenueChart.data.datasets[0].data.length - 1] !== inv.money) {
@@ -122,7 +137,7 @@ function updateCharts(data) {
         }
     }
 
-    // 4. Efficiency
+    // 4. Grafico efficienza produttiva (Line chart)
     if (efficiencyChart && inv) {
         const eff = inv.olives_bought > 0 ? ((inv.oil_extra + inv.oil_virgin) / inv.olives_bought * 100).toFixed(1) : 0;
         
@@ -140,7 +155,7 @@ function updateCharts(data) {
         }
     }
 
-    // 5. График Inventory (Bar)
+    // 5. Grafico inventario corrente (Bar chart)
     if (inventoryChart && inv) {
         inventoryChart.data.datasets[0].data = [
             inv.oil_virgin, 
@@ -153,7 +168,7 @@ function updateCharts(data) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Инициализация графиков в понятном стиле
+    // Inizializzazione grafico produzione
     productChart = new Chart(document.getElementById('productChart'), {
         type: 'pie',
         data: {
@@ -165,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Inizializzazione grafico temperatura
     tempChart = new Chart(document.getElementById('tempChart'), {
         type: 'line',
         data: {
@@ -173,6 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Inizializzazione grafico ricavi/saldo
     revenueChart = new Chart(document.getElementById('revenueChart'), {
         type: 'line',
         data: {
@@ -181,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Inizializzazione grafico efficienza produttiva
     efficiencyChart = new Chart(document.getElementById('efficiencyChart'), {
         type: 'line',
         data: {
@@ -189,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Inizializzazione grafico inventario corrente
     inventoryChart = new Chart(document.getElementById('inventoryChart'), {
         type: 'bar',
         data: {
@@ -205,49 +224,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 2. Валидация инпутов
     document.querySelectorAll('.input-sell').forEach(input => {
         input.addEventListener('invalid', () => input.setCustomValidity("Errore!"));
         input.addEventListener('input', () => input.setCustomValidity(''));
     });
 });
 
+// =============================================================================
+// AGGIORNAMENTO TABELLA LOG E AZIONI
+// =============================================================================
+
 function updateLogTable() {
     fetch('/api/status_data')
         .then(response => response.json())
         .then(data => {
-            // Вот здесь мы вызываем функцию обновления таблицы, 
-            // передавая ей массив продаж из data.logs
+            
             if (data.logs) {
                 updateTableContent(data.logs);
             }
         })
-        .catch(err => console.error("Ошибка обновления таблицы:", err));
+        .catch(err => console.error("Errore nell'aggiornamento della tabella:", err));
 }
 
 document.querySelectorAll('.action-btn').forEach(button => {
     button.addEventListener('click', function(e) {
-        e.preventDefault(); // Останавливаем стандартное действие (перезагрузку)
-        const url = this.getAttribute('data-url'); // Берем адрес из кнопки
+        e.preventDefault(); 
+        const url = this.getAttribute('data-url'); 
 
         fetch(url, { method: 'POST' })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    // Обновляем страницу, чтобы таблица показала новые данные
                     updateDashboard(); 
                 } else {
-                    alert(data.message || "Ошибка операции!");
+                    alert(data.message || "Errore nell'operazione!");
                 }
             })
-            .catch(err => console.error("Ошибка:", err));
+            .catch(err => console.error("Errore:", err));
     });
 });
 function updateTableContent(logs) {
     const tbody = document.getElementById('log-table-body');
     if (!tbody) return;
 
-    // Никаких фильтров, никаких проверок температуры!
     tbody.innerHTML = logs.map(log => `
         <tr style="border-bottom: 1px solid #eee;">
             <td style="padding: 12px;">${log.date || '---'}</td>
@@ -257,4 +276,3 @@ function updateTableContent(logs) {
         </tr>`).join('');
 }
 
-//setInterval(updateDashboard, 3000);
