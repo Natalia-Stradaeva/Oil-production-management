@@ -1,6 +1,4 @@
 # Oil-production-management
-
-# Oil-production-management
 *Simulazione avanzata della gestione operativa e logistica di un oleificio (Settore Primario).*
 
 **Autore:** Natalia Stradaeva  

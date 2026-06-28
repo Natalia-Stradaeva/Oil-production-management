@@ -1,21 +1,31 @@
-#Python
-__pycache__/
-*.py[cod]
+"""
+Oil-production-management - File di esclusione Git
 
-#Virtual Environment
+Questo file definisce le cartelle e i file che non devono essere 
+tracciati dal controllo versione per mantenere il repository pulito.
+"""
+
+# =============================================================================
+# DIPENDENZE E AMBIENTE
+# =============================================================================
 .venv/
 venv/
 env/
+__pycache__/
+*.py[cod]
 
-#IDE settings
-.vscode/
+# =============================================================================
+# CONFIGURAZIONE E DATI LOCALI
+# =============================================================================
+.vscode/          # Impostazioni IDE
+.env              # File di configurazione sensibile (credenziali)
+instance/         # Database locale e file di sessione
+*.db              # Database SQLite locale
+*.sqlite3         # Database SQLite locale
 
-#Database
-*.db
-*.sqlite3
-
-#OS files
-.DS_Store
-Thumbs.db
-
+# =============================================================================
+# SISTEMA OPERATIVO
+# =============================================================================
+.DS_Store         # File di sistema macOS
+Thumbs.db         # File di sistema Windows
 
