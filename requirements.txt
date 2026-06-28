@@ -1,3 +1,10 @@
-Flask==2.3.2
-Flask-SQLAlchemy==3.0.5
-Flask-Login==0.6.2
+"""
+Oil-production-management - Elenco dipendenze
+
+Questo file elenca le librerie necessarie per l'esecuzione del simulatore.
+Per installare tutte le dipendenze: pip install -r requirements.txt
+"""
+
+Flask==2.3.2 # Framework web core per la gestione delle rotte e delle viste
+Flask-SQLAlchemy==3.0.5 # ORM per l'interazione con il database e la persistenza dei dati
+Flask-Login==0.6.2 # Gestione delle sessioni utente e controllo dell'accesso

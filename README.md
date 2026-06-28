@@ -1,5 +1,12 @@
 # Oil-production-management
- Simulazione avanzata della gestione operativa e logistica di un oleificio (Settore Primario)
+
+# Oil-production-management
+*Simulazione avanzata della gestione operativa e logistica di un oleificio (Settore Primario).*
+
+**Autore:** Natalia Stradaeva  
+**Università:** Università Telematica Pegaso  
+**Corso di Laurea:** Informatica per le aziende digitali (L-31)  
+**Project Work:** Tema n. 1 - La digitalizzazione dell’impresa (PW 15)
 
 ## Descrizione:
 
@@ -34,10 +41,12 @@ Gestione semplice e diretta delle scorte: il sistema tiene traccia di tutto ciò
 La Dashboard include 5 grafici (distribuzione prodotti, temperature, ricavi, efficienza, magazzino) e una tabella con le ultime 20 vendite. È disponibile una funzione per esportare l'intera pagina in PDF. È prevista in futuro l'implementazione di tasti di esportazione separati per singoli grafici e tabelle, per rendere l'analisi industriale più pratica e mirata.
 
 ### Ambiente:
- La sansa non viene buttata, ma venduta come fertilizzante o per cosmetici. Questo riduce gli sprechi e aiuta l'ambiente (economia circolare).
+La sansa non viene buttata, ma venduta come fertilizzante o per cosmetici. Questo riduce gli sprechi e aiuta l'ambiente (economia circolare).
 
 ## Struttura del progetto:
-/
+
+```
+Oil-production-management
 ├── app.py              # Punto di ingresso, inizializzazione del server
 ├── models.py           # Schema del database (SQLAlchemy)
 ├── requirements.txt    # Elenco delle dipendenze del progetto
@@ -50,6 +59,7 @@ La Dashboard include 5 grafici (distribuzione prodotti, temperature, ricavi, eff
 │   └── js/main.js      # Script client-side e chiamate AJAX
 ├── templates/          # Template HTML (interfaccia utente)
 └── utils/              # Funzioni di supporto e validatori
+```
 
 
 ## Istruzioni per l'avvio
@@ -72,11 +82,13 @@ L'immagine promozionale è stata generata con l'ausilio di intelligenza artifici
 Anteprima della simulazione (PDF):
  È disponibile il file dashboard_full_view.pdf che fornisce una panoramica completa dell'interfaccia e dei dati, ideale per un'analisi rapida senza esecuzione del codice.   
 
- ## Accesso al sistema (Demo)
-Per testare le funzionalità di amministrazione, utilizzare le seguenti credenziali di prova:
-* **Username:** `admin`
-* **Password:** `123`
+### Sicurezza e Accesso
+IIl sistema implementa un modello di autenticazione basato su Flask-Login per gestire le sessioni utente.
 
-## Autore
-Natalia Stradaeva'
-Project Work - CdS Informatica per le Aziende Digitali (L-31)   
+*   **Versione Demo:** Per i test delle funzionalità, è possibile accedere con le credenziali di amministratore:
+    *   **Username:** `admin`
+    *   **Password:** `123`
+*   **Scalabilità:** L'attuale architettura è predisposta per l'integrazione di sistemi di autenticazione professionale (es. implementazione di hashing delle password tramite librerie crittografiche come BCrypt).
+
+---
+**Natalia Stradaeva** | *Informatica per le Aziende Digitali (L-31)* | *Università Telematica Pegaso*  
