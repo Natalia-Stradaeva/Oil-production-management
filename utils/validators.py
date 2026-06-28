@@ -1,43 +1,68 @@
-# Prezzi e limiti (costanti)
-COST_BUY_OLIVES = 105.0
-COST_PRODUCTION_BATCH = 16.5
-PRICE_VIRGIN = 25.0
-PRICE_EVO = 15.0
-PRICE_SANSA = 0.20
-COST_BOTTLE = 0.80  # Costo per bottiglia da 1 litro
-COST_CORK = 0.20    # Costo per tappo di bottiglia
-PRICE_VIRGIN_BOTTLED = 30.0 
-PRICE_EVO_BOTTLED = 20.0
-# Tempo di elaborazione (in minuti)
-PRODUCTION_CAPACITY = 200.0  # кг/час
-BATCH_SIZE = 100.0  # kg per batch di produzione
-PACKAGING_BATCH_SIZE = 50 # комплект для 50 бутылок (50 литров масла)
-TIME_SPREMITURA = 120
-TIME_FILTRAZIONE = 60
-TIME_IMBOTTIGLIAMENTO_UNIT = 2 # 2 minuti per 1 bottiglia
-COST_BAG = 0.50             # prezzo per sacco vuoto da 10 kg per sansa
-BAGS_PER_PACKAGE = 500      # prezzo per confezione di 500 sacchi vuoti
-MAX_TEMP_COLD_PRESS = 27.0  # limite di temperatura per la spremitura a freddo
-WASTE_COEFFICIENT = 0.02    # perdite durante la produzione (2%)
-SANSA_BAG_CAPACITY = 10     # 10 kg di sansa per sacco
+"""
+Oleificio Simulation - Configuration & Validation Module
 
-ESTIMATED_HARVEST_Q = 15.0      # Средний урожай в квинталях
-DEFAULT_YIELD_LITERS = 18.0     # Средний выход масла в литрах с партии
-SANSA_KG_PER_BATCH = 80.0       # Средний выход жмыха в кг
+Modulo dedicato alla definizione delle costanti di sistema (finanziarie, produttive 
+e tecniche) e alla gestione delle funzioni di validazione per le operazioni di magazzino.
 
-# Базовые коэффициенты для планирования
-OIL_YIELD_PREMIUM = 0.18  # Сколько литров масла с 1 кг оливок
-OIL_YIELD_EVO = 0.15     # Сколько литров масла с 1 кг оливок для EVO
-GOVERNMENT_SUBSIDY = 5000.0        # Сумма субсидии
-SANSA_BAG_CAPACITY = 10            # Вместимость мешка сансы в кг
-MARKUP_BOTTLED_OIL = 1.2           # Наценка на бутилированное масло (20%)
-# Коэффициенты выхода жмыха (Sansa)
-SANSA_YIELD_PREMIUM = 0.40
-SANSA_YIELD_EVO = 0.45
+Tutti i parametri sono configurabili per adattarsi ai diversi scenari produttivi
+previsti dal progetto.
+"""
 
-TIME_COOLING = 30      # Мин. на охлаждение
-TIME_FILTRATION = 60   # Мин. на фильтрацию
+# =============================================================================
+# PARAMETRI ECONOMICI: Prezzi e Costi
+# =============================================================================
+COST_BUY_OLIVES = 105.0 # Costo di acquisto per un lotto di olive (mercato)
+COST_PRODUCTION_BATCH = 16.5 # Costo operativo per ciclo di produzione (frangitura)
+COST_BOTTLE = 0.80  # Costo unitario per bottiglia da 1 litro
+COST_CORK = 0.20    # Costo unitario per tappo
+COST_BAG = 0.50     # Costo unitario per sacco vuoto da 10 kg per sansa
 
+MARKUP_BOTTLED_OIL = 1.2  # Coefficiente di ricarico per olio imbottigliato (+20%)
+GOVERNMENT_SUBSIDY = 5000.0  # Sussidio statale una tantum per il supporto alla produzione
+
+PRICE_VIRGIN = 25.0 # Prezzo vendita al litro (olio Vergine sfuso)
+PRICE_EVO = 15.0 # Prezzo vendita al litro (olio EVO sfuso)
+PRICE_SANSA = 0.20 # Prezzo di vendita per kg di sansa
+PRICE_VIRGIN_BOTTLED = 30.0 # Prezzo di vendita per bottiglia (Vergine)
+PRICE_EVO_BOTTLED = 20.0 # Prezzo di vendita per bottiglia (EVO)
+
+# =============================================================================
+# PARAMETRI PRODUTTIVI E TECNICI: Capacità e Rese
+# =============================================================================
+PRODUCTION_CAPACITY = 200.0  # Capacità massima di frangitura (kg/ora)
+BATCH_SIZE = 100.0  # Dimensione standard del lotto di produzione (kg)
+PACKAGING_BATCH_SIZE = 50 # Numero di bottiglie prodotte per kit imballaggio
+BAGS_PER_PACKAGE = 500   # Quantità di sacchi in una confezione standard
+SANSA_BAG_CAPACITY = 10   # Capacità in kg per un singolo sacco di sansa
+
+# Coefficienti di resa e scarto
+WASTE_COEFFICIENT = 0.02    # Coefficiente di perdita fisiologica durante la produzione (2%)
+ESTIMATED_HARVEST_Q = 15.0  # Raccolto stimato per ettaro (in quintali)
+DEFAULT_YIELD_LITERS = 18.0  # Resa media olio (litri per lotto)
+SANSA_KG_PER_BATCH = 80.0  # Produzione media di sansa per lotto (kg)
+
+OIL_YIELD_PREMIUM = 0.18  # Resa olio per kg di olive (Vergine)
+OIL_YIELD_EVO = 0.15  # Resa olio per kg di olive (EVO)
+SANSA_YIELD_PREMIUM = 0.40 # Coefficiente di conversione sansa (Vergine)
+SANSA_YIELD_EVO = 0.45 # Coefficiente di conversione sansa (EVO)
+
+# =============================================================================
+# PARAMETRI TEMPORALI: Tempistiche di processo (in minuti)
+# =============================================================================
+TIME_SPREMITURA = 120 # Tempo necessario per la spremitura
+TIME_IMBOTTIGLIAMENTO_UNIT = 2 # Tempo necessario per imbottigliare 1 unità
+TIME_COOLING = 30  # Tempo di raffreddamento dell'olio
+TIME_FILTRATION = 60 # Tempo supplementare per il processo di filtrazione
+
+# =============================================================================
+# VINCOLI OPERATIVI
+# =============================================================================
+MAX_TEMP_COLD_PRESS = 27.0  # Temperatura massima per la spremitura a freddo
+
+
+# =============================================================================
+# LOGICHE DI VALIDAZIONE
+# =============================================================================
 def can_afford(current_money, cost):
     """Controlla se ci sono abbastanza soldi per l'operazione"""
     return current_money >= cost
