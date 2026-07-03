@@ -1,5 +1,5 @@
-# Oil-production-management
-*Simulazione avanzata della gestione operativa e logistica di un oleificio (Settore Primario).*
+# Oleificio Natalia ( Sannio, Morcone): Digitalizzazione per la sostenibilità ambientale e l'ottimizzazione del profitto aziendale. 
+
 
 **Autore:** Natalia Stradaeva  
 **Università:** Università Telematica Pegaso  

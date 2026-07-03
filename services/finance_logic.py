@@ -1,5 +1,6 @@
 """
-Oleificio Simulation - Finance Logic Module
+Oleificio Natalia ( Sannio, Morcone): Digitalizzazione per la sostenibilità ambientale e l'ottimizzazione del profitto aziendale. 
+ - Finance Logic Module
 
 Modulo dedicato ai calcoli di bilancio, analisi dei costi di produzione 
 e stima della redditività operativa.

@@ -1,5 +1,6 @@
 """
-Oleificio Simulation - Controller Module
+Oleificio Natalia ( Sannio, Morcone): Digitalizzazione per la sostenibilità ambientale e l'ottimizzazione del profitto aziendale. 
+ - Controller Module
 
 Architettura: MVC (Model-View-Controller)
 Framework: Flask

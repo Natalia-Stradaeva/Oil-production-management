@@ -1,5 +1,6 @@
 """
-Oleificio Simulation - Configuration & Validation Module
+Oleificio Natalia ( Sannio, Morcone): Digitalizzazione per la sostenibilità ambientale e l'ottimizzazione del profitto aziendale. 
+ - Configuration & Validation Module
 
 Modulo dedicato alla definizione delle costanti di sistema (finanziarie, produttive 
 e tecniche) e alla gestione delle funzioni di validazione per le operazioni di magazzino.

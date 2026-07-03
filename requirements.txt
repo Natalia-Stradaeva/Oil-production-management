@@ -1,5 +1,6 @@
 """
-Oil-production-management - Elenco dipendenze
+Oleificio Natalia ( Sannio, Morcone): Digitalizzazione per la sostenibilità ambientale e l'ottimizzazione del profitto aziendale. 
+ - Elenco dipendenze
 
 Questo file elenca le librerie necessarie per l'esecuzione del simulatore.
 Per installare tutte le dipendenze: pip install -r requirements.txt

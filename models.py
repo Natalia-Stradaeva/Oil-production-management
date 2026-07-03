@@ -1,5 +1,6 @@
 """
-Oleificio Simulation - Database Models Module
+Oleificio Natalia ( Sannio, Morcone): Digitalizzazione per la sostenibilità ambientale e l'ottimizzazione del profitto aziendale. 
+- Database Models Module
 
 Definizione dello schema del database tramite SQLAlchemy.
 Modulo responsabile della persistenza dei dati relativi all'autenticazione, 

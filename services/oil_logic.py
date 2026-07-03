@@ -1,5 +1,6 @@
 """
-Oleificio Simulation - Oil Logic Module
+Oleificio Natalia ( Sannio, Morcone): Digitalizzazione per la sostenibilità ambientale e l'ottimizzazione del profitto aziendale. 
+ - Oil Logic Module
 
 Modulo dedicato alla logica di trasformazione industriale delle olive:
 gestione dei rendimenti produttivi, tempi di processo, condizioni climatiche
